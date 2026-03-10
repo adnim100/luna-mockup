@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luna AI - Mockup Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Inter",sans-serif;background:#0f0f23;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px}
+.logo{width:100px;height:100px;background:radial-gradient(circle at 30% 30%,#F5B731,#E89B00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;box-shadow:0 20px 60px rgba(245,183,49,.3);margin-bottom:32px}
+h1{font-size:2.5rem;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,#fff,#7C6FE0);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{font-size:1.1rem;color:rgba(255,255,255,.6);margin-bottom:48px;text-align:center}
+.cards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;max-width:800px}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:32px;width:360px;text-decoration:none;color:#fff;transition:all .3s}
+.card:hover{background:rgba(124,111,224,.15);border-color:rgba(124,111,224,.4);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.3)}
+.card-icon{font-size:48px;margin-bottom:16px}
+.card h3{font-size:1.25rem;font-weight:600;margin-bottom:8px}
+.card p{font-size:.9rem;color:rgba(255,255,255,.6);line-height:1.6}
+.card .tag{display:inline-block;background:rgba(124,111,224,.2);color:#7C6FE0;font-size:.75rem;font-weight:600;padding:4px 12px;border-radius:20px;margin-top:16px}
+.footer{margin-top:60px;font-size:.8rem;color:rgba(255,255,255,.3);text-align:center}
+@media(max-width:767px){h1{font-size:1.75rem}.cards{flex-direction:column;align-items:center}.card{width:100%;max-width:360px}}
+</style>
+</head>
+<body>
+<div class="logo">&#9790;</div>
+<h1>Luna AI</h1>
+<p class="sub">Interactive prototypes for the e&amp; DCB integration</p>
+<div class="cards">
+  <a href="mockup/index.html" class="card">
+    <div class="card-icon">&#128241;</div>
+    <h3>Mobile App (WebView)</h3>
+    <p>iPhone mockup of the Luna subscription flow inside the e&amp; app. Screens A1-A6: Landing, Tier selection, MSISDN, OTP, Confirmation.</p>
+    <span class="tag">e&amp; App Integration</span>
+  </a>
+  <a href="mockup/desktop.html" class="card">
+    <div class="card-icon">&#128187;</div>
+    <h3>Web (Onlineshop)</h3>
+    <p>Desktop version following the e&amp; DCB design system (dd.AI Toolkit 9.0.0). Full subscription flow with plan selection and OTP verification.</p>
+    <span class="tag">e&amp; Onlineshop</span>
+  </a>
+</div>
+<div class="footer">Luna AI by Amira AI | AC AI Convergence LLC | 2026</div>
+</body>
+</html>
