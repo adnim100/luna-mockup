@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luna — Personal AI Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* === RESET & BASE === */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-family:'Inter',system-ui,sans-serif;font-size:16px;-webkit-font-smoothing:antialiased}
+body{background:#E8E8ED;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+a{text-decoration:none}
+button{cursor:pointer;font-family:inherit}
+input{font-family:inherit}
+
+/* === DESIGN TOKENS === */
+:root{
+  --primary:#1A1B4B;--secondary:#7C6FE0;--accent:#F5B731;
+  --success:#2ECC71;--error:#E74C3C;--warning:#F39C12;
+  --bg:#F8F9FA;--bg-dark:#1E1E2E;
+  --text:#2D3436;--text-sec:#636E72;
+  --card-r:12px;--btn-r:8px;--shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+/* === PHONE FRAME === */
+.phone-frame{
+  width:390px;height:844px;background:#fff;border-radius:44px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.2),inset 0 0 0 2px #333;
+  position:relative;display:flex;flex-direction:column;
+}
+.status-bar{
+  height:54px;background:#fff;display:flex;justify-content:space-between;align-items:flex-end;
+  padding:0 28px 8px;font-size:14px;font-weight:600;color:var(--primary);position:relative;z-index:10;
+  flex-shrink:0;
+}
+.status-bar .notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:126px;height:34px;background:#000;border-radius:0 0 20px 20px;
+}
+.status-bar-right{display:flex;gap:6px;align-items:center;font-size:13px}
+
+/* === SCREEN CONTAINER === */
+.screen-container{flex:1;overflow:hidden;position:relative}
+.screen{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  display:none;flex-direction:column;background:var(--bg);
+  animation:fadeIn .2s ease;
+}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeInReverse{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+
+/* === SCREEN HEADER === */
+.screen-header{
+  display:flex;align-items:center;gap:12px;padding:12px 20px;
+  background:#fff;border-bottom:1px solid #f0f0f0;flex-shrink:0;min-height:48px;
+}
+.screen-header span{font-size:17px;font-weight:600;color:var(--primary)}
+.screen-header.main{justify-content:space-between}
+.header-left{display:flex;align-items:center}
+.header-right{display:flex;align-items:center;gap:12px}
+.logo{font-size:22px;font-weight:700;color:var(--secondary)}
+.back-btn{
+  background:none;border:none;font-size:22px;color:var(--primary);
+  padding:4px 8px 4px 0;line-height:1;
+}
+.icon-btn{background:none;border:none;font-size:20px;padding:4px}
+.avatar-sm{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+
+/* === SCREEN CONTENT === */
+.screen-content{flex:1;overflow-y:auto;padding:16px 20px 20px;-webkit-overflow-scrolling:touch}
+
+/* === CARDS === */
+.card{
+  background:#fff;border-radius:var(--card-r);padding:16px;
+  margin-bottom:12px;box-shadow:var(--shadow);
+}
+.card.clickable{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.card.clickable:active{transform:scale(.98);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* === LIST ITEMS === */
+.list-item{
+  display:flex;align-items:center;gap:12px;padding:14px 4px;
+  border-bottom:1px solid #f5f5f5;cursor:pointer;
+}
+.list-item:last-child{border-bottom:none}
+.list-icon{font-size:24px;flex-shrink:0;width:36px;text-align:center}
+.list-body{flex:1;min-width:0}
+.list-title{font-size:15px;font-weight:600;color:var(--text)}
+.list-sub{font-size:13px;color:var(--text-sec);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.chevron{font-size:20px;color:#ccc;font-weight:300}
+
+/* === BUTTONS === */
+.btn{
+  display:block;width:100%;padding:14px 20px;border:none;border-radius:var(--btn-r);
+  font-size:15px;font-weight:600;text-align:center;transition:opacity .15s;
+}
+.btn:active{opacity:.85}
+.btn.primary{background:var(--secondary);color:#fff}
+.btn.secondary{background:#F0EDFF;color:var(--secondary)}
+.btn.outline{background:transparent;border:2px solid #e0e0e0;color:var(--text)}
+.btn.danger{background:#FDE8E8;color:var(--error)}
+
+/* === BADGES === */
+.badge{
+  display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;
+  border-radius:20px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;
+}
+.badge.success{background:#E8FBF0;color:#1B9E4B}
+.badge.warning{background:#FEF5E7;color:#C87D0A}
+.badge.error{background:#FDE8E8;color:#C0392B}
+.badge.info{background:#EBF5FB;color:#2980B9}
+.badge.purple{background:#F0EDFF;color:var(--secondary)}
+
+/* === SECTION TITLE === */
+.section-title{
+  font-size:13px;font-weight:700;color:var(--text-sec);text-transform:uppercase;
+  letter-spacing:.8px;margin:20px 0 10px;display:flex;align-items:center;gap:8px;
+}
+
+/* === QUICK ACTIONS === */
+.quick-actions{display:flex;gap:12px;margin-bottom:16px}
+.quick-action{
+  flex:1;background:#fff;border:none;border-radius:var(--card-r);padding:16px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:var(--shadow);
+  transition:transform .15s;
+}
+.quick-action:active{transform:scale(.95)}
+.qa-icon{font-size:28px}
+.quick-action span{font-size:12px;font-weight:600;color:var(--text)}
+
+/* === STATUS CARD === */
+.status-card{
+  display:flex;align-items:center;gap:10px;background:#E8FBF0;
+  padding:12px 16px;border-radius:var(--btn-r);margin-bottom:16px;
+}
+.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.status-dot.active{background:var(--success);box-shadow:0 0 8px rgba(46,204,113,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 4px rgba(46,204,113,.3)}50%{box-shadow:0 0 12px rgba(46,204,113,.6)}}
+.status-card span{font-size:14px;color:#1B9E4B;font-weight:500}
+
+/* === ACTIVITY ITEMS === */
+.activity-item{
+  display:flex;align-items:center;gap:12px;padding:14px 0;
+  border-bottom:1px solid #f0f0f0;cursor:pointer;
+}
+.activity-icon{font-size:20px;width:36px;text-align:center;flex-shrink:0}
+.activity-body{flex:1;min-width:0}
+.activity-title{font-size:14px;font-weight:600;color:var(--text)}
+.activity-sub{font-size:13px;color:var(--text-sec);margin-top:2px}
+.activity-time{font-size:12px;color:var(--text-sec);flex-shrink:0}
+
+/* === STAT ROW === */
+.stat-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.stat-label{font-size:13px;font-weight:600;color:var(--text-sec);width:60px;flex-shrink:0}
+.stat-value{font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;width:50px;text-align:right}
+
+/* === PROGRESS BAR === */
+.progress-bar{flex:1;height:8px;background:#E8E8ED;border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:4px;transition:width .5s ease}
+
+/* === TAB BAR (in-screen) === */
+.tab-bar{display:flex;gap:0;margin-bottom:16px;background:#fff;border-radius:var(--btn-r);overflow:hidden;border:1px solid #e0e0e0}
+.tab{
+  flex:1;padding:10px;font-size:13px;font-weight:600;text-align:center;
+  background:transparent;border:none;color:var(--text-sec);transition:all .2s;
+}
+.tab.active{background:var(--secondary);color:#fff}
+
+/* === CHAT === */
+.chat-bubble{
+  max-width:82%;padding:12px 16px;border-radius:18px;margin-bottom:10px;
+  font-size:14px;line-height:1.5;color:var(--text);
+}
+.chat-bubble.user{
+  background:var(--secondary);color:#fff;margin-left:auto;
+  border-bottom-right-radius:4px;
+}
+.chat-bubble.luna{
+  background:#fff;box-shadow:var(--shadow);
+  border-bottom-left-radius:4px;
+}
+.chat-input{
+  display:flex;align-items:center;gap:8px;padding:10px 16px;
+  background:#fff;border-top:1px solid #f0f0f0;flex-shrink:0;
+}
+.chat-input .input{flex:1;border:none;outline:none;font-size:15px;padding:8px 0}
+.attach-btn,.mic-btn,.send-btn{background:none;border:none;font-size:20px;padding:4px}
+.send-btn{color:var(--secondary)}
+
+/* === CHIPS === */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{
+  background:#fff;border:1.5px solid #e0e0e0;border-radius:20px;
+  padding:10px 16px;font-size:13px;font-weight:500;color:var(--text);
+  cursor:pointer;transition:all .2s;
+}
+.chip:active{background:var(--secondary);color:#fff;border-color:var(--secondary)}
+
+/* === BOOKING CARDS === */
+.booking-card{
+  background:#fff;border-radius:var(--card-r);padding:14px 16px;margin-bottom:10px;
+  box-shadow:var(--shadow);cursor:pointer;transition:transform .15s;
+}
+.booking-card:active{transform:scale(.98)}
+.bc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.bc-body{margin-bottom:8px}
+.bc-price{font-size:18px;font-weight:700;color:var(--secondary)}
+
+/* === STEPS === */
+.step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;position:relative}
+.step:not(:last-child)::after{
+  content:'';position:absolute;left:11px;top:34px;bottom:-10px;
+  width:2px;background:#e0e0e0;
+}
+.step.done::after{background:var(--success)}
+.step.active::after{background:#e0e0e0}
+.step-dot{
+  width:24px;height:24px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;
+}
+.step.done .step-dot{background:var(--success);color:#fff}
+.step.active .step-dot{background:var(--secondary);color:#fff;animation:pulse 2s infinite}
+.step.pending .step-dot{background:#e0e0e0;color:#999}
+.step span:last-child{font-size:14px;color:var(--text);padding-top:2px}
+.step.pending span:last-child{color:var(--text-sec)}
+
+/* === TOGGLES === */
+.toggle{display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer}
+.toggle input{display:none}
+.toggle-slider{
+  width:48px;height:28px;background:#ccc;border-radius:14px;position:relative;
+  transition:background .3s;flex-shrink:0;
+}
+.toggle-slider::after{
+  content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;
+  background:#fff;border-radius:50%;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.toggle input:checked+.toggle-slider{background:var(--secondary)}
+.toggle input:checked+.toggle-slider::after{transform:translateX(20px)}
+.toggle-label{font-size:15px;color:var(--text);font-weight:500}
+
+/* === INPUTS === */
+.input-group{margin-bottom:14px}
+.input-group label{display:block;font-size:12px;font-weight:600;color:var(--text-sec);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.input{
+  width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:var(--btn-r);
+  font-size:15px;color:var(--text);background:#fff;outline:none;transition:border-color .2s;
+}
+.input:focus{border-color:var(--secondary)}
+
+/* === EMAIL ITEMS === */
+.email-item{
+  display:flex;align-items:center;gap:12px;padding:14px 0;
+  border-bottom:1px solid #f0f0f0;cursor:pointer;
+}
+.email-dir{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.email-body{flex:1;min-width:0}
+.email-from{font-size:14px;font-weight:600;color:var(--text)}
+.email-subject{font-size:13px;color:var(--text-sec);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.email-time{font-size:12px;color:var(--text-sec);flex-shrink:0}
+
+/* === LUNA AVATAR === */
+.luna-avatar{font-size:48px;text-align:center}
+
+/* === LIVE INDICATOR === */
+.live-indicator{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:700;color:var(--error);letter-spacing:2px;
+}
+.live-dot{
+  width:12px;height:12px;border-radius:50%;background:var(--error);
+  animation:pulse-red 1.5s infinite;
+}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 4px rgba(231,76,60,.3)}50%{box-shadow:0 0 16px rgba(231,76,60,.6)}}
+
+/* === WHISPER OVERLAY === */
+.whisper-overlay{
+  position:absolute;inset:0;background:linear-gradient(180deg,#1A1B4B 0%,#2E1F5E 100%);
+  z-index:100;
+}
+
+/* === EXPAND CONTENT === */
+.expand-content{display:none;padding:8px 16px 4px}
+.expand-content.expanded{display:block}
+
+/* === BOTTOM NAVIGATION === */
+.bottom-nav{
+  display:flex;background:#fff;border-top:1px solid #f0f0f0;
+  padding:8px 0 28px;flex-shrink:0;
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;padding:6px 0;color:var(--text-sec);
+  transition:color .2s;font-size:11px;font-weight:600;
+}
+.nav-item .nav-icon{font-size:22px;height:26px;display:flex;align-items:center}
+.nav-item.active{color:var(--secondary)}
+
+/* === RESPONSIVE: REAL MOBILE === */
+@media(max-width:420px){
+  body{padding:0;background:#fff}
+  .phone-frame{width:100%;height:100vh;border-radius:0;box-shadow:none;border:none}
+}
+
+/* === PAGE INFO === */
+.page-info{
+  text-align:center;padding:20px;color:#999;font-size:13px;margin-top:16px;
+}
+.page-info a{color:var(--secondary)}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="notch"></div>
+    <div class="status-bar-right">
+      <span>5G</span>
+      <span>100%</span>
+    </div>
+  </div>
+
+  <!-- SCREEN CONTAINER -->
+  <div class="screen-container">
+
+<!-- SCREEN 1: Welcome / Onboarding -->
+<div class="screen" id="screen-welcome" data-tab="onboarding">
+  <div class="screen-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;">
+    <div class="luna-avatar" style="font-size:64px;margin-bottom:24px;">🌙</div>
+    <h1 style="font-size:32px;color:#1A1B4B;margin-bottom:12px;">Hi, I'm Luna</h1>
+    <p style="color:#636E72;font-size:16px;line-height:1.6;margin-bottom:40px;">Your personal AI assistant. I take calls, book appointments, research, and handle tasks — so you don't have to.</p>
+    <button class="btn primary" onclick="showScreen('permissions')" style="width:100%;margin-bottom:16px;">Get Started</button>
+    <p style="color:#636E72;font-size:12px;">By continuing you agree to our Terms & Privacy Policy</p>
+  </div>
+</div>
+
+<!-- SCREEN 2: Permissions -->
+<div class="screen" id="screen-permissions" data-tab="onboarding">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goBack()">&larr;</button>
+    <span>Setup</span>
+  </div>
+  <div class="screen-content">
+    <div class="section-title">Luna needs a few permissions</div>
+    <div class="card">
+      <div class="list-item">
+        <div class="list-icon">🔔</div>
+        <div class="list-body"><div class="list-title">Notifications</div><div class="list-sub">So I can alert you about calls and task updates</div></div>
+        <div class="list-right"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="list-item">
+        <div class="list-icon">🎤</div>
+        <div class="list-body"><div class="list-title">Microphone</div><div class="list-sub">For voice dictation in chat</div></div>
+        <div class="list-right"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="list-item">
+        <div class="list-icon">📅</div>
+        <div class="list-body"><div class="list-title">Calendar</div><div class="list-sub">To check your availability</div></div>
+        <div class="list-right"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+      </div>
+    </div>
+    <button class="btn primary" onclick="showScreen('phone-setup')" style="width:100%;margin-top:24px;">Continue</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: Phone Setup -->
+<div class="screen" id="screen-phone-setup" data-tab="onboarding">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goBack()">&larr;</button>
+    <span>Your Luna Number</span>
+  </div>
+  <div class="screen-content">
+    <div class="card" style="text-align:center;padding:24px;">
+      <div style="font-size:12px;color:#636E72;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Your Luna Number</div>
+      <div style="font-size:24px;font-weight:700;color:#1A1B4B;letter-spacing:1px;">+971 58 234 5678</div>
+    </div>
+    <button class="btn outline" style="width:100%;margin-top:12px;">Copy Number</button>
+    <div class="section-title">Set up call forwarding</div>
+    <p style="color:#636E72;font-size:14px;margin-bottom:16px;">Forward your calls to Luna when you can't answer</p>
+    <div class="card clickable" onclick="this.querySelector('.expand-content').classList.toggle('expanded')">
+      <div class="list-item">
+        <div class="list-icon">🍎</div>
+        <div class="list-body"><div class="list-title">iPhone</div><div class="list-sub">Tap to see instructions</div></div>
+        <div class="list-right"><span class="chevron">&rsaquo;</span></div>
+      </div>
+      <div class="expand-content">
+        <div class="step done"><span class="step-dot">1</span><span>Settings &gt; Phone &gt; Call Forwarding</span></div>
+        <div class="step done"><span class="step-dot">2</span><span>Enter: +971 58 234 5678</span></div>
+      </div>
+    </div>
+    <div class="card clickable" onclick="this.querySelector('.expand-content').classList.toggle('expanded')">
+      <div class="list-item">
+        <div class="list-icon">🤖</div>
+        <div class="list-body"><div class="list-title">Android</div><div class="list-sub">Tap to see instructions</div></div>
+        <div class="list-right"><span class="chevron">&rsaquo;</span></div>
+      </div>
+      <div class="expand-content">
+        <div class="step done"><span class="step-dot">1</span><span>Phone app &gt; Settings &gt; Calls &gt; Call Forwarding</span></div>
+        <div class="step done"><span class="step-dot">2</span><span>Set "When unanswered": +971 58 234 5678</span></div>
+      </div>
+    </div>
+    <button class="btn secondary" style="width:100%;margin-top:16px;">Test Call Forwarding</button>
+    <button class="btn primary" onclick="showScreen('connect-accounts')" style="width:100%;margin-top:12px;">Continue</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: Connect Accounts -->
+<div class="screen" id="screen-connect-accounts" data-tab="onboarding">
+  <div class="screen-header">
+    <button class="back-btn" onclick="goBack()">&larr;</button>
+    <span>Connect Accounts</span>
+  </div>
+  <div class="screen-content">
+    <p style="color:#636E72;font-size:15px;line-height:1.5;margin-bottom:24px;">Connect your accounts so Luna can manage your calendar and emails</p>
+    <div class="card clickable" onclick="showScreen('dashboard')">
+      <div class="list-item"><div class="list-icon">🔵</div><div class="list-body"><div class="list-title">Connect Google</div><div class="list-sub">Calendar, Contacts, Gmail</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    </div>
+    <div class="card clickable" onclick="showScreen('dashboard')">
+      <div class="list-item"><div class="list-icon">🟦</div><div class="list-body"><div class="list-title">Connect Microsoft</div><div class="list-sub">Calendar, Contacts, Outlook</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <a href="#" onclick="showScreen('dashboard');return false;" style="color:#7C6FE0;font-size:15px;">Skip for now</a>
+    </div>
+    <p style="color:#636E72;font-size:12px;text-align:center;margin-top:16px;">You can always connect later in Settings</p>
+  </div>
+</div>
+
+<!-- SCREEN 5: Dashboard -->
+<div class="screen" id="screen-dashboard" data-tab="home">
+  <div class="screen-header main">
+    <div class="header-left"><span class="logo">Luna</span></div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="showScreen('notifications')">🔔</button>
+      <div class="avatar-sm" onclick="showScreen('profile')">RW</div>
+    </div>
+  </div>
+  <div class="screen-content">
+    <h2 style="color:#1A1B4B;margin-bottom:4px;">Good morning, Rainer</h2>
+    <p style="color:#636E72;margin-bottom:20px;">Here's what's happening</p>
+    <div class="quick-actions">
+      <button class="quick-action" onclick="showScreen('calls-list')"><div class="qa-icon">📞</div><span>Calls</span></button>
+      <button class="quick-action" onclick="showScreen('chat')"><div class="qa-icon">📅</div><span>Calendar</span></button>
+      <button class="quick-action" onclick="showScreen('chat')"><div class="qa-icon">🔍</div><span>Search</span></button>
+      <button class="quick-action" onclick="showScreen('luna-mailbox')"><div class="qa-icon">✉️</div><span>Email</span></button>
+    </div>
+    <div class="status-card"><div class="status-dot active"></div><span>Luna is active and listening</span></div>
+    <div class="section-title">Recent Activity</div>
+    <div class="activity-item" onclick="showScreen('call-detail')"><div class="activity-icon">📞</div><div class="activity-body"><div class="activity-title">Missed call from Sarah Mitchell</div><div class="activity-sub">Wants to discuss proposal</div></div><div class="activity-time">10m ago</div></div>
+    <div class="activity-item" onclick="showScreen('task-callback')"><div class="activity-icon">✅</div><div class="activity-body"><div class="activity-title">Dentist appointment booked</div><div class="activity-sub">Dr. Ahmed, Mon 2pm</div></div><div class="activity-time">1h ago</div></div>
+    <div class="activity-item" onclick="showScreen('task-research')"><div class="activity-icon">✈️</div><div class="activity-body"><div class="activity-title">Flight research completed</div><div class="activity-sub">3 options found DXB→FRA</div></div><div class="activity-time">2h ago</div></div>
+    <div class="section-title">Usage This Month</div>
+    <div class="stat-row"><span class="stat-label">Tasks</span><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div><span class="stat-value">18/30</span></div>
+    <div class="stat-row"><span class="stat-label">Minutes</span><div class="progress-bar"><div class="progress-fill" style="width:37.5%"></div></div><span class="stat-value">45/120</span></div>
+  </div>
+</div>
+
+<!-- SCREEN 6: Calls List -->
+<div class="screen" id="screen-calls-list" data-tab="calls">
+  <div class="screen-header main"><div class="header-left"><span class="logo">Luna</span></div><div class="header-right"><button class="icon-btn" onclick="showScreen('notifications')">🔔</button><div class="avatar-sm" onclick="showScreen('profile')">RW</div></div></div>
+  <div class="screen-content">
+    <div class="tab-bar"><button class="tab active">All</button><button class="tab">Missed</button><button class="tab">Outbound</button></div>
+    <div class="list-item" onclick="showScreen('call-detail')"><div class="list-icon">📞</div><div class="list-body"><div class="list-title">Sarah Mitchell</div><div class="list-sub">Wants to discuss the proposal deadline</div></div><div class="list-right"><span class="badge info">Forwarded</span><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('call-detail')"><div class="list-icon">📞</div><div class="list-body"><div class="list-title">Dr. Ahmed's Office</div><div class="list-sub">Appointment confirmed for Monday 2pm</div></div><div class="list-right"><span class="badge success">Callback</span><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('call-detail')"><div class="list-icon">📤</div><div class="list-body"><div class="list-title">Emirates Airline</div><div class="list-sub">Checked flight availability to Frankfurt</div></div><div class="list-right"><span class="badge purple">Outbound</span><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('call-detail')"><div class="list-icon">📞</div><div class="list-body"><div class="list-title">+971 55 XXX XXXX</div><div class="list-sub">Wrong number — caller was looking for a garage</div></div><div class="list-right"><span class="badge info">Forwarded</span><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('call-detail')"><div class="list-icon">📞</div><div class="list-body"><div class="list-title">Zuma Dubai</div><div class="list-sub">Confirmed reservation for Saturday 8pm</div></div><div class="list-right"><span class="badge success">Callback</span><span class="chevron">&rsaquo;</span></div></div>
+  </div>
+</div>
+
+<!-- SCREEN 7: Call Detail -->
+<div class="screen" id="screen-call-detail" data-tab="calls">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Call Detail</span></div>
+  <div class="screen-content">
+    <div class="card" style="text-align:center;padding:20px;"><div style="font-size:22px;font-weight:700;color:#1A1B4B;">Sarah Mitchell</div><div style="color:#636E72;font-size:14px;margin-top:4px;">TechCorp</div></div>
+    <div class="card"><div style="display:flex;justify-content:space-between;text-align:center;"><div><div style="font-size:11px;color:#636E72;text-transform:uppercase;">Type</div><div style="font-size:14px;font-weight:600;color:#2D3436;">Forwarded</div></div><div><div style="font-size:11px;color:#636E72;text-transform:uppercase;">Duration</div><div style="font-size:14px;font-weight:600;color:#2D3436;">3:42</div></div><div><div style="font-size:11px;color:#636E72;text-transform:uppercase;">Time</div><div style="font-size:14px;font-weight:600;color:#2D3436;">Today, 10:15 AM</div></div></div></div>
+    <div class="section-title">Summary</div>
+    <div class="card"><p style="color:#2D3436;font-size:14px;line-height:1.6;">Sarah called about the project proposal. She wants to extend the deadline to April 15th and needs your confirmation by end of week. She mentioned the client is flexible on scope but firm on budget.</p></div>
+    <div class="section-title">Transcript</div>
+    <div class="card"><p style="color:#2D3436;font-size:14px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"><strong>Luna:</strong> Hello, this is Luna, Rainer's assistant. How can I help you today?<br><strong>Sarah:</strong> Hi Luna, it's Sarah Mitchell from TechCorp. I was hoping to catch Rainer about the proposal we discussed last week...</p><a href="#" onclick="return false;" style="color:#7C6FE0;font-size:13px;margin-top:8px;display:block;">Show full transcript</a></div>
+    <div class="section-title">Audio</div>
+    <div class="card"><div style="display:flex;align-items:center;gap:12px;"><button class="btn secondary" style="width:40px;height:40px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;">▶</button><div class="progress-bar" style="flex:1;"><div class="progress-fill" style="width:0%"></div></div><span style="color:#636E72;font-size:13px;">3:42</span></div></div>
+    <div style="display:flex;gap:8px;margin-top:16px;"><button class="btn primary" style="flex:1;">📞 Call Back</button><button class="btn secondary" style="flex:1;">✅ Create Task</button><button class="btn outline" style="flex:1;">↗ Share</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 8: Live Listen -->
+<div class="screen" id="screen-live-listen" data-tab="calls">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Live Listen</span></div>
+  <div class="screen-content" style="text-align:center;">
+    <div class="live-indicator"><span class="live-dot"></span>LIVE</div>
+    <div class="card" style="margin-top:16px;padding:20px;"><div style="font-size:20px;font-weight:700;color:#1A1B4B;">Ahmed Hassan</div><div style="color:#636E72;font-size:14px;margin-top:4px;">+971 50 XXX XXXX</div><span class="badge info" style="margin-top:8px;">Forwarded call</span></div>
+    <div style="font-size:48px;font-weight:700;color:#1A1B4B;margin:24px 0;">2:15</div>
+    <div class="card" style="padding:24px;"><div style="display:flex;align-items:center;justify-content:center;gap:4px;height:48px;"><div style="width:4px;height:20px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:36px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:24px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:40px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:16px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:32px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:20px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:44px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:28px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:18px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:36px;background:#7C6FE0;border-radius:2px;"></div><div style="width:4px;height:22px;background:#7C6FE0;border-radius:2px;"></div></div></div>
+    <p style="color:#636E72;font-size:14px;margin:16px 0 24px;">Luna is handling the call professionally</p>
+    <div style="display:flex;justify-content:center;gap:16px;"><button class="btn outline" style="width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;"><span style="font-size:24px;">🔇</span><span style="font-size:11px;">Mute</span></button><button class="btn primary" style="width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;"><span style="font-size:24px;">📞</span><span style="font-size:11px;">Take Over</span></button><button class="btn danger" style="width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;"><span style="font-size:24px;">❌</span><span style="font-size:11px;">End</span></button></div>
+    <p style="color:#636E72;font-size:12px;margin-top:20px;">The caller cannot hear you</p>
+  </div>
+</div>
+
+<!-- SCREEN 9: Whisper -->
+<div class="screen" id="screen-whisper" data-tab="calls">
+  <div class="whisper-overlay">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;">
+      <div style="font-size:56px;margin-bottom:20px;">📞</div>
+      <div style="font-size:18px;color:rgba(255,255,255,0.7);margin-bottom:24px;letter-spacing:1px;text-transform:uppercase;">Incoming Whisper</div>
+      <div class="card" style="width:100%;text-align:center;padding:24px;margin-bottom:32px;">
+        <div style="font-size:24px;font-weight:700;color:#1A1B4B;">Sarah Mitchell</div>
+        <div style="color:#636E72;font-size:15px;margin-top:4px;">TechCorp</div>
+        <p style="color:#2D3436;font-size:15px;margin-top:16px;line-height:1.5;">She wants to discuss the project proposal — connect now?</p>
+      </div>
+      <div style="display:flex;gap:16px;width:100%;">
+        <button class="btn primary" onclick="showScreen('call-detail')" style="flex:1;background:#2ECC71;font-size:16px;padding:16px;">✅ Connect</button>
+        <button class="btn outline" onclick="goBack()" style="flex:1;border-color:rgba(255,255,255,0.4);color:#fff;font-size:16px;padding:16px;">❌ Decline</button>
+      </div>
+      <div style="margin-top:32px;text-align:center;"><p style="color:rgba(255,255,255,0.6);font-size:13px;">Caller is on hold with Luna</p><p style="color:rgba(255,255,255,0.4);font-size:12px;margin-top:4px;">0:32</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 10: Chat Home -->
+<div class="screen" id="screen-chat" data-tab="chat">
+  <div class="screen-header main"><div class="header-left"><span class="logo">Luna</span></div><div class="header-right"><button class="icon-btn" onclick="showScreen('notifications')">🔔</button><div class="avatar-sm" onclick="showScreen('profile')">RW</div></div></div>
+  <div class="screen-content">
+    <div style="text-align:center;padding:32px 0 24px;"><div class="luna-avatar">🌙</div><p style="color:#636E72;font-size:16px;margin-top:12px;">How can I help you today?</p></div>
+    <div class="chips"><button class="chip" onclick="showScreen('chat-flight')">Find a flight to Frankfurt</button><button class="chip" onclick="showScreen('chat-dentist')">Book a dentist appointment</button><button class="chip" onclick="showScreen('chat-flight')">Check my calendar this week</button><button class="chip" onclick="showScreen('chat-flight')">Summarize my emails</button></div>
+  </div>
+  <div class="chat-input"><button class="attach-btn">📎</button><input class="input" placeholder="Message Luna..."><button class="mic-btn">🎤</button><button class="send-btn">➤</button></div>
+</div>
+
+<!-- SCREEN 11: Chat Flight -->
+<div class="screen" id="screen-chat-flight" data-tab="chat">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Chat with Luna</span></div>
+  <div class="screen-content">
+    <div class="chat-bubble user">Find me a flight from Dubai to Frankfurt on April 5th</div>
+    <div class="chat-bubble luna">I'll search for flights DXB → FRA on April 5th. Any preferences?</div>
+    <div class="chat-bubble user">Business class, direct if possible</div>
+    <div class="chat-bubble luna">Found 3 direct business class options:</div>
+    <div class="booking-card" onclick="showScreen('chat-confirm')"><div class="bc-header"><span style="font-weight:700;">Emirates EK47</span><span class="badge success">★ Recommended</span></div><div class="bc-body"><div style="font-size:16px;font-weight:600;color:#1A1B4B;">08:15 → 12:45</div><div style="color:#636E72;font-size:13px;">Direct · 6h 30m</div></div><div class="bc-price">4,250 AED</div></div>
+    <div class="booking-card"><div class="bc-header"><span style="font-weight:700;">Lufthansa LH631</span><span class="badge warning">Best Price</span></div><div class="bc-body"><div style="font-size:16px;font-weight:600;color:#1A1B4B;">14:30 → 19:15</div><div style="color:#636E72;font-size:13px;">Direct · 6h 45m</div></div><div class="bc-price">3,890 AED</div></div>
+    <div class="booking-card"><div class="bc-header"><span style="font-weight:700;">Emirates EK49</span></div><div class="bc-body"><div style="font-size:16px;font-weight:600;color:#1A1B4B;">21:45 → 02:15+1</div><div style="color:#636E72;font-size:13px;">Direct · 6h 30m</div></div><div class="bc-price">4,100 AED</div></div>
+    <div class="chat-bubble luna">I recommend EK47 — morning arrival, best for business. Shall I book it?</div>
+    <div style="display:flex;gap:8px;margin:8px 0 16px;"><button class="btn primary" onclick="showScreen('chat-confirm')" style="flex:1;">Book EK47</button><button class="btn outline" style="flex:1;">See More</button></div>
+  </div>
+  <div class="chat-input"><button class="attach-btn">📎</button><input class="input" placeholder="Message Luna..."><button class="mic-btn">🎤</button><button class="send-btn">➤</button></div>
+</div>
+
+<!-- SCREEN 12: Chat Dentist -->
+<div class="screen" id="screen-chat-dentist" data-tab="chat">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Chat with Luna</span></div>
+  <div class="screen-content">
+    <div class="chat-bubble user">I need a dentist appointment</div>
+    <div class="chat-bubble luna">I found 3 highly rated dentists near you. My top recommendation:</div>
+    <div class="card" style="margin:8px 0 12px;"><div style="font-size:17px;font-weight:700;color:#1A1B4B;">Dr. Sarah Ahmed</div><div style="color:#636E72;font-size:13px;margin-top:4px;">⭐ 4.8 · Al Wasl Road · 2.3 km away</div><div style="color:#2D3436;font-size:14px;margin-top:8px;">General & Cosmetic Dentistry</div><div style="color:#2ECC71;font-size:13px;font-weight:600;margin-top:4px;">Next available: Tomorrow</div></div>
+    <div class="chat-bubble luna">Should I call them to book? When would you prefer?</div>
+    <div class="chat-bubble user">Tomorrow afternoon if possible</div>
+    <div class="chat-bubble luna">Got it! I'll call Dr. Ahmed's office now and try to get you a slot tomorrow afternoon. 📞</div>
+    <div class="status-card" style="margin:8px 0 12px;"><div class="status-dot active"></div><span>Task created — I'll update you when done</span></div>
+    <button class="btn outline" onclick="showScreen('task-progress')" style="width:100%;margin-bottom:16px;">View Task</button>
+  </div>
+  <div class="chat-input"><button class="attach-btn">📎</button><input class="input" placeholder="Message Luna..."><button class="mic-btn">🎤</button><button class="send-btn">➤</button></div>
+</div>
+
+<!-- SCREEN 13: Chat Confirm -->
+<div class="screen" id="screen-chat-confirm" data-tab="chat">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Chat with Luna</span></div>
+  <div class="screen-content">
+    <div class="chat-bubble luna">Great news! I'd like to book this flight for you:</div>
+    <div class="booking-card" style="border:2px solid #7C6FE0;"><div class="bc-header"><span style="font-weight:700;">Emirates EK47</span><span class="badge success">★ Recommended</span></div><div class="bc-body"><div style="font-size:14px;color:#636E72;">DXB → FRA · April 5, 2026</div><div style="font-size:14px;color:#2D3436;margin-top:4px;">Business Class · Direct</div></div><div class="bc-price">4,250 AED</div></div>
+    <div class="chat-bubble luna">This will be charged to your payment method on file. Confirm?</div>
+    <div style="display:flex;gap:8px;margin:8px 0 16px;"><button class="btn primary" style="flex:1;">✅ Confirm Booking</button><button class="btn outline" style="flex:1;">✏️ Change</button></div>
+  </div>
+  <div class="chat-input"><button class="attach-btn">📎</button><input class="input" placeholder="Message Luna..."><button class="mic-btn">🎤</button><button class="send-btn">➤</button></div>
+</div>
+
+<!-- SCREEN 14: Chat Task Created -->
+<div class="screen" id="screen-chat-task-created" data-tab="chat">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Chat with Luna</span></div>
+  <div class="screen-content">
+    <div class="chat-bubble user">Book me a dentist for tomorrow afternoon</div>
+    <div class="chat-bubble luna">I'm on it! Here's my plan:</div>
+    <div class="card" style="margin:8px 0 12px;"><div class="step done"><span class="step-dot">✓</span><span>📞 Call Dr. Ahmed's office</span></div><div class="step active"><span class="step-dot">●</span><span>📅 Request afternoon slot for tomorrow</span></div><div class="step pending"><span class="step-dot">○</span><span>✅ Confirm time with you</span></div></div>
+    <div class="chat-bubble luna">I'll notify you as soon as I have an update. This usually takes 5-10 minutes.</div>
+    <button class="btn outline" onclick="showScreen('task-progress')" style="width:100%;margin:8px 0 16px;">View Task</button>
+  </div>
+  <div class="chat-input"><button class="attach-btn">📎</button><input class="input" placeholder="Message Luna..."><button class="mic-btn">🎤</button><button class="send-btn">➤</button></div>
+</div>
+
+<!-- SCREEN 15: Tasks List -->
+<div class="screen" id="screen-tasks-list" data-tab="tasks">
+  <div class="screen-header main"><div class="header-left"><span class="logo">Luna</span></div><div class="header-right"><button class="icon-btn" onclick="showScreen('notifications')">🔔</button><div class="avatar-sm" onclick="showScreen('profile')">RW</div></div></div>
+  <div class="screen-content">
+    <div class="section-title">In Progress <span class="badge info">2</span></div>
+    <div class="card clickable" onclick="showScreen('task-progress')"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">📞 Book dentist appointment</div><div style="font-size:13px;color:#636E72;margin-bottom:10px">Calling Dr. Ahmed's office...</div><div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div><div style="font-size:12px;color:#636E72;margin-top:8px">5 min ago</div></div>
+    <div class="card clickable" onclick="showScreen('task-research')"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">🏨 Research hotels in Frankfurt</div><div style="font-size:13px;color:#636E72;margin-bottom:10px">Comparing prices across 5 sites...</div><div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div><div style="font-size:12px;color:#636E72;margin-top:8px">12 min ago</div></div>
+    <div class="section-title">Waiting for You <span class="badge warning">1</span></div>
+    <div class="card clickable" onclick="showScreen('chat-confirm')"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">✈️ Book flight DXB → FRA</div><div style="font-size:13px;color:#636E72;margin-bottom:10px">Ready to book — awaiting your confirmation</div><div style="display:flex;align-items:center;justify-content:space-between"><span class="badge warning">Action needed</span><span style="font-size:12px;color:#636E72">20 min ago</span></div></div>
+    <div class="section-title">Completed <span class="badge success">3</span></div>
+    <div class="card clickable" onclick="showScreen('task-callback')"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">✅ Book dentist appointment</div><div style="font-size:13px;color:#636E72;margin-bottom:6px">Confirmed: Dr. Ahmed, Mon 2pm</div><div style="font-size:12px;color:#636E72">1 hour ago</div></div>
+    <div class="card clickable" onclick="showScreen('task-complete')"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">✅ Find restaurant for Saturday</div><div style="font-size:13px;color:#636E72;margin-bottom:6px">Booked: Zuma Dubai, 8pm, 4 people</div><div style="font-size:12px;color:#636E72">2 hours ago</div></div>
+    <div class="card clickable"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">✅ Check visa requirements for Japan</div><div style="font-size:13px;color:#636E72;margin-bottom:6px">Report ready — no visa needed for UAE residents</div><div style="font-size:12px;color:#636E72">Yesterday</div></div>
+  </div>
+</div>
+
+<!-- SCREEN 16: Task Progress -->
+<div class="screen" id="screen-task-progress" data-tab="tasks">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Task Detail</span></div>
+  <div class="screen-content">
+    <div class="card"><div style="font-size:18px;font-weight:700;color:#1A1B4B;margin-bottom:10px">📞 Book Dentist Appointment</div><div style="display:flex;align-items:center;gap:8px"><span class="badge info">In Progress</span><span style="font-size:12px;color:#636E72">Started 5 min ago</span></div></div>
+    <div class="section-title">Progress</div>
+    <div class="card"><div class="step done"><span class="step-dot">✓</span><span>Found Dr. Ahmed's office — +971 4 345 6789</span></div><div class="step done"><span class="step-dot">✓</span><span>Called Dr. Ahmed's office</span></div><div class="step active"><span class="step-dot">●</span><span>On hold with receptionist...</span></div><div class="step pending"><span class="step-dot">○</span><span>Negotiate appointment time</span></div><div class="step pending"><span class="step-dot">○</span><span>Confirm with you</span></div></div>
+    <div class="card" style="background:#F0EDFF;border:1px solid #7C6FE0"><div style="font-size:14px;color:#1A1B4B;line-height:1.6">🎧 Luna is currently on hold with the receptionist. Estimated wait: 2-3 minutes.</div></div>
+    <button class="btn danger" style="margin-top:16px">Cancel Task</button>
+  </div>
+</div>
+
+<!-- SCREEN 17: Task Callback -->
+<div class="screen" id="screen-task-callback" data-tab="tasks">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Task Detail</span></div>
+  <div class="screen-content">
+    <div class="card"><div style="font-size:18px;font-weight:700;color:#1A1B4B;margin-bottom:10px">✅ Dentist Appointment Booked</div><span class="badge success">Completed</span></div>
+    <div class="section-title">What happened</div>
+    <div class="card"><div class="step done"><span class="step-dot">✓</span><span>Called Dr. Ahmed's office</span></div><div class="step done"><span class="step-dot">✓</span><span>Receptionist took message — will call back</span></div><div class="step done"><span class="step-dot">✓</span><span>Dr. Ahmed's office called back (12 min later)</span></div><div class="step done"><span class="step-dot">✓</span><span>Appointment confirmed!</span></div></div>
+    <div class="section-title">Your Appointment</div>
+    <div class="card" style="border-left:4px solid #2ECC71"><div style="display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;color:#2D3436">📅 Monday, March 16, 2026</div><div style="font-size:14px;color:#2D3436">🕐 2:00 PM</div><div style="font-size:14px;color:#2D3436">👨‍⚕️ Dr. Sarah Ahmed — General Dentistry</div><div style="font-size:14px;color:#2D3436">📍 Al Wasl Road, Dubai</div><div style="font-size:14px;color:#2D3436">📞 +971 4 345 6789</div></div></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn primary" style="flex:1">📅 Add to Calendar</button><button class="btn outline" style="flex:1">📍 Show on Map</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 18: Task Complete -->
+<div class="screen" id="screen-task-complete" data-tab="tasks">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Task Detail</span></div>
+  <div class="screen-content">
+    <div class="card"><div style="font-size:18px;font-weight:700;color:#1A1B4B;margin-bottom:10px">✅ Restaurant Booked</div><div style="display:flex;align-items:center;gap:8px"><span class="badge success">Completed</span><span style="font-size:12px;color:#636E72">2 hours ago</span></div></div>
+    <div class="section-title">Summary</div>
+    <div class="card"><div style="font-size:14px;color:#2D3436;line-height:1.6">Booked a table at Zuma Dubai for Saturday evening. Party of 4 at 8:00 PM. Confirmation received.</div></div>
+    <div class="section-title">Steps Taken</div>
+    <div class="card"><div class="step done"><span class="step-dot">✓</span><span>Searched top-rated restaurants in Dubai</span></div><div class="step done"><span class="step-dot">✓</span><span>Filtered by: Rating 4.5+, Fine Dining, Available Saturday</span></div><div class="step done"><span class="step-dot">✓</span><span>Shortlisted 3 options: Zuma, Nobu, La Petite Maison</span></div><div class="step done"><span class="step-dot">✓</span><span>Called Zuma Dubai</span></div><div class="step done"><span class="step-dot">✓</span><span>Reserved table for 4 — Saturday 8:00 PM</span></div></div>
+    <div class="section-title">Booking Details</div>
+    <div class="card"><div style="display:flex;flex-direction:column;gap:10px"><div style="font-size:15px;font-weight:600;color:#1A1B4B">🍽️ Zuma Dubai</div><div style="font-size:14px;color:#2D3436">📅 Saturday, March 14, 2026</div><div style="font-size:14px;color:#2D3436">🕗 8:00 PM · 4 people</div><div style="font-size:14px;color:#2D3436">📍 DIFC, Gate Village</div><div style="font-size:13px;color:#636E72;margin-top:4px">Confirmation: #ZM-2026-0314</div></div></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn primary" style="flex:1">📅 Add to Calendar</button><button class="btn outline" style="flex:1">↗ Share</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 19: Task Research -->
+<div class="screen" id="screen-task-research" data-tab="tasks">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Task Detail</span></div>
+  <div class="screen-content">
+    <div class="card"><div style="font-size:18px;font-weight:700;color:#1A1B4B;margin-bottom:10px">🏨 Hotel Research — Frankfurt</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span class="badge info">In Progress</span></div><div class="progress-bar"><div class="progress-fill" style="width:65%"></div></div></div>
+    <div class="section-title">Luna's Findings So Far</div>
+    <div class="card"><div style="font-size:14px;color:#2D3436;line-height:1.6">Based on your travel dates (Apr 5-8) and preference for 4-star+ hotels near the city center, here are my top picks:</div></div>
+    <div class="booking-card"><div class="bc-header"><span style="font-weight:700;">Steigenberger Frankfurter Hof</span><span class="badge purple">★ Top Pick</span></div><div class="bc-body"><div style="font-size:13px;color:#636E72;margin-bottom:4px">⭐ 4.7 · City Center · 0.3 km to Messe</div><div style="font-size:13px;color:#2D3436">Classic luxury, excellent service</div></div><div class="bc-price"><span style="font-size:18px;font-weight:700;color:#7C6FE0">€289</span><span style="font-size:13px;color:#636E72">/night</span></div></div>
+    <div class="booking-card"><div class="bc-header"><span style="font-weight:700;">Roomers Frankfurt</span><span class="badge success">Best Value</span></div><div class="bc-body"><div style="font-size:13px;color:#636E72;margin-bottom:4px">⭐ 4.5 · Bahnhofsviertel · 0.8 km to Messe</div><div style="font-size:13px;color:#2D3436">Design hotel, rooftop bar</div></div><div class="bc-price"><span style="font-size:18px;font-weight:700;color:#7C6FE0">€245</span><span style="font-size:13px;color:#636E72">/night</span></div></div>
+    <div class="booking-card"><div class="bc-header"><span style="font-weight:700;">Fleming's Deluxe Frankfurt</span></div><div class="bc-body"><div style="font-size:13px;color:#636E72;margin-bottom:4px">⭐ 4.3 · City Center · 0.5 km to Messe</div><div style="font-size:13px;color:#2D3436">Modern business hotel</div></div><div class="bc-price"><span style="font-size:18px;font-weight:700;color:#7C6FE0">€195</span><span style="font-size:13px;color:#636E72">/night</span></div></div>
+    <div class="card" style="background:#F0EDFF;border:1px solid #7C6FE0"><div style="font-size:14px;color:#1A1B4B;line-height:1.6">💡 <strong>Luna's recommendation:</strong> I recommend Steigenberger for business trips — it's the closest to your meetings and has excellent reviews.</div></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn primary" style="flex:1">Book Top Pick</button><button class="btn outline" style="flex:1">See More Options</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 20: Luna Mailbox -->
+<div class="screen" id="screen-luna-mailbox" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Luna's Mailbox</span></div>
+  <div class="screen-content">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between"><div style="font-size:15px;font-weight:600;color:#1A1B4B">luna-rainer@luna.ai</div><span class="badge success">Active</span></div>
+    <div class="section-title">Recent Emails</div>
+    <div class="email-item" onclick="showScreen('email-detail')"><div class="email-dir">📥</div><div class="email-body"><div class="email-from">Dr. Ahmed's Office</div><div class="email-subject">Appointment Confirmation</div></div><div class="email-time">1h ago</div></div>
+    <div class="email-item" onclick="showScreen('email-detail')"><div class="email-dir">📥</div><div class="email-body"><div class="email-from">Emirates</div><div class="email-subject">Booking Confirmation — EK47</div></div><div class="email-time">3h ago</div></div>
+    <div class="email-item" onclick="showScreen('email-detail')"><div class="email-dir">📤</div><div class="email-body"><div class="email-from">To: Zuma Dubai</div><div class="email-subject">Reservation Request — Saturday 8pm</div></div><div class="email-time">5h ago</div></div>
+    <div class="email-item" onclick="showScreen('email-detail')"><div class="email-dir">📥</div><div class="email-body"><div class="email-from">Amazon UAE</div><div class="email-subject">Your order has been shipped</div></div><div class="email-time">Yesterday</div></div>
+    <div class="email-item" onclick="showScreen('email-detail')"><div class="email-dir">📤</div><div class="email-body"><div class="email-from">To: Dr. Ahmed's Office</div><div class="email-subject">Appointment Request for Mr. Wilmers</div></div><div class="email-time">Yesterday</div></div>
+    <div class="email-item" onclick="showScreen('email-detail')"><div class="email-dir">📥</div><div class="email-body"><div class="email-from">Lufthansa</div><div class="email-subject">Special Business Class Offer DXB-FRA</div></div><div class="email-time">2 days ago</div></div>
+  </div>
+</div>
+
+<!-- SCREEN 21: Email Detail -->
+<div class="screen" id="screen-email-detail" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Email</span></div>
+  <div class="screen-content">
+    <div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:18px">📥</span><span style="font-size:13px;font-weight:600;color:#636E72">Received</span></div><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#636E72"><strong style="color:#2D3436">From:</strong> Dr. Ahmed's Office</div><div style="font-size:13px;color:#636E72"><strong style="color:#2D3436">To:</strong> luna-rainer@luna.ai</div><div style="font-size:13px;color:#636E72"><strong style="color:#2D3436">Subject:</strong> <span style="color:#1A1B4B;font-weight:600">Appointment Confirmation</span></div><div style="font-size:12px;color:#636E72">Today, 11:30 AM</div></div></div>
+    <div class="section-title">Message</div>
+    <div class="card"><div style="font-size:14px;color:#2D3436;line-height:1.7;white-space:pre-line">Dear Luna,
+
+This is to confirm the appointment for Mr. Rainer Wilmers with Dr. Sarah Ahmed.
+
+Date: Monday, March 16, 2026
+Time: 2:00 PM
+Location: Al Wasl Dental Clinic, Al Wasl Road, Dubai
+
+Please arrive 10 minutes early for registration.
+
+Best regards,
+Dr. Ahmed's Office</div></div>
+    <div class="section-title">Luna's Auto-Reply</div>
+    <div class="card" style="border-left:4px solid #7C6FE0"><div style="font-size:14px;color:#2D3436;line-height:1.7;white-space:pre-line">Thank you for confirming. Mr. Wilmers will be there at 2:00 PM on Monday. He will arrive 10 minutes early as requested.
+
+Best regards,
+Luna — Personal Assistant to Rainer Wilmers</div></div>
+    <div style="text-align:center;margin-top:16px"><span class="badge success">✓ Handled automatically — no action needed</span></div>
+  </div>
+</div>
+
+<!-- SCREEN 22: Settings -->
+<div class="screen" id="screen-settings" data-tab="settings">
+  <div class="screen-header main"><div class="header-left"><span class="logo">Luna</span></div><div class="header-right"><button class="icon-btn" onclick="showScreen('notifications')">🔔</button><div class="avatar-sm" onclick="showScreen('profile')">RW</div></div></div>
+  <div class="screen-content">
+    <div class="list-item" onclick="showScreen('profile')"><div class="list-icon">👤</div><div class="list-body"><div class="list-title">Profile & Preferences</div><div class="list-sub">Rainer Wilmers · Dubai</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('subscription')"><div class="list-icon">💳</div><div class="list-body"><div class="list-title">Subscription & Usage</div><div class="list-sub">Luna Assistant · 18/30 tasks</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('connected')"><div class="list-icon">🔗</div><div class="list-body"><div class="list-title">Connected Accounts</div><div class="list-sub">Google connected</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('phone-number')"><div class="list-icon">📞</div><div class="list-body"><div class="list-title">Phone & Luna Number</div><div class="list-sub">+971 58 234 5678</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('behavior')"><div class="list-icon">🤖</div><div class="list-body"><div class="list-title">Luna Behavior</div><div class="list-sub">Language, voice, personality</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('notifications')"><div class="list-icon">🔔</div><div class="list-body"><div class="list-title">Notifications</div><div class="list-sub">Push, Email, WhatsApp</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item" onclick="showScreen('luna-mailbox')"><div class="list-icon">✉️</div><div class="list-body"><div class="list-title">Luna's Mailbox</div><div class="list-sub">luna-rainer@luna.ai</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item"><div class="list-icon">🔒</div><div class="list-body"><div class="list-title">Privacy & Security</div><div class="list-sub">Data, permissions, audit log</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div class="list-item"><div class="list-icon">❓</div><div class="list-body"><div class="list-title">Help & Support</div><div class="list-sub">FAQ, contact, feedback</div></div><div class="list-right"><span class="chevron">&rsaquo;</span></div></div>
+    <div style="text-align:center;padding:24px 0;font-size:12px;color:#636E72">Luna v1.0.0 · Made by Amira AI</div>
+  </div>
+</div>
+
+<!-- SCREEN 23: Profile -->
+<div class="screen" id="screen-profile" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Profile</span></div>
+  <div class="screen-content">
+    <div style="display:flex;justify-content:center;padding:20px 0"><div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#1A1B4B,#7C6FE0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;font-weight:700">RW</div></div>
+    <div class="input-group"><label>Name</label><input class="input" value="Rainer Wilmers"></div>
+    <div class="input-group"><label>Email</label><input class="input" value="rainer@email.com"></div>
+    <div class="input-group"><label>Phone</label><input class="input" value="+971 58 123 4567"></div>
+    <div class="input-group"><label>Language</label><input class="input" value="English" readonly style="cursor:pointer"></div>
+    <div class="input-group"><label>Location</label><input class="input" value="Dubai, UAE"></div>
+    <div class="section-title">What Luna Has Learned</div>
+    <div class="card"><div style="display:flex;flex-direction:column;gap:10px"><div style="font-size:14px;color:#2D3436">✈️ Prefers business class flights</div><div style="font-size:14px;color:#2D3436">🌅 Morning departures preferred</div><div style="font-size:14px;color:#2D3436">🕐 Appointments in the afternoon</div><div style="font-size:14px;color:#2D3436">🍽️ Likes upscale dining</div><div style="font-size:14px;color:#2D3436">📍 Max 5km for local services</div></div></div>
+    <div class="section-title">Trust Level</div>
+    <div class="card"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:8px">Level 45 / 100</div><div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div><div style="font-size:14px;color:#2D3436;margin-top:10px">Luna asks for confirmation on most actions</div><div style="font-size:12px;color:#636E72;margin-top:6px">Trust increases when you confirm Luna's suggestions</div></div>
+    <button class="btn primary" style="margin-top:16px">Save Changes</button>
+  </div>
+</div>
+
+<!-- SCREEN 24: Subscription -->
+<div class="screen" id="screen-subscription" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Subscription</span></div>
+  <div class="screen-content">
+    <div class="card" style="border:2px solid #7C6FE0"><div style="font-size:22px;font-weight:700;color:#1A1B4B;margin-bottom:6px">Luna Assistant</div><div style="font-size:20px;font-weight:700;color:#7C6FE0;margin-bottom:10px">600 AED <span style="font-size:14px;font-weight:400;color:#636E72">/ month</span></div><div style="display:flex;align-items:center;justify-content:space-between"><span class="badge purple">Current Plan</span><span style="font-size:13px;color:#636E72">Next billing: April 1, 2026</span></div></div>
+    <div class="section-title">Usage This Month</div>
+    <div class="stat-row"><span class="stat-label">Tasks</span><div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div><span class="stat-value">18/30</span></div>
+    <div class="stat-row"><span class="stat-label">Minutes</span><div class="progress-bar"><div class="progress-fill" style="width:37.5%"></div></div><span class="stat-value">45/120</span></div>
+    <div style="display:flex;gap:10px;margin-top:16px"><button class="btn outline" style="flex:1;font-size:13px">Buy +15 Tasks · 150 AED</button><button class="btn outline" style="flex:1;font-size:13px">Buy +60 Min · 100 AED</button></div>
+    <div class="section-title">Plan Features</div>
+    <div class="card"><div style="display:flex;flex-direction:column;gap:8px"><div style="font-size:14px;color:#2D3436">✓ Professional call handling</div><div style="font-size:14px;color:#2D3436">✓ Calendar integration</div><div style="font-size:14px;color:#2D3436">✓ Whisper Mode</div><div style="font-size:14px;color:#2D3436">✓ Chat with Luna</div><div style="font-size:14px;color:#2D3436">✓ Luna email address</div><div style="font-size:14px;color:#2D3436">✓ 30 autonomous tasks/month</div><div style="font-size:14px;color:#2D3436">✓ Web research</div><div style="font-size:14px;color:#2D3436">✓ Outbound calls</div><div style="font-size:14px;color:#2D3436">✓ Browser automation</div><div style="font-size:14px;color:#2D3436">✓ Deep user profile</div></div></div>
+    <button class="btn outline" style="margin-top:16px">Change Plan</button>
+    <div style="text-align:center;margin-top:16px"><button style="background:none;border:none;color:#E74C3C;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;padding:8px">Cancel Subscription</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 25: Connected Accounts -->
+<div class="screen" id="screen-connected" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Connected Accounts</span></div>
+  <div class="screen-content">
+    <div class="section-title">Google</div>
+    <div class="card" style="border-left:4px solid #2ECC71"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:16px;font-weight:600;color:#1A1B4B">🔵 Google Account</div><span class="badge success">Connected</span></div><div style="font-size:14px;color:#636E72;margin-bottom:16px">rainer@gmail.com</div><div style="font-size:13px;font-weight:600;color:#2D3436;margin-bottom:12px">Permissions</div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">📅 Calendar (read & write)</span></label><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">👥 Contacts (read)</span></label><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">📧 Gmail (read)</span></label><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span><span class="toggle-label">📤 Gmail (send)</span></label><div style="font-size:12px;color:#636E72;margin:8px 0 16px;line-height:1.5">Enable send access to let Luna reply to emails on your behalf</div><button class="btn danger" style="padding:10px;font-size:13px">Disconnect Google</button></div>
+    <div class="section-title">Microsoft</div>
+    <div class="card"><div style="font-size:16px;font-weight:600;color:#1A1B4B;margin-bottom:6px">🟦 Microsoft Account</div><div style="font-size:14px;color:#636E72;margin-bottom:16px">Not connected</div><button class="btn primary">Connect Microsoft</button><div style="font-size:12px;color:#636E72;margin-top:10px;line-height:1.5">Connect to access Outlook calendar, email, and contacts</div></div>
+  </div>
+</div>
+
+<!-- SCREEN 26: Luna Behavior -->
+<div class="screen" id="screen-behavior" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Luna Behavior</span></div>
+  <div class="screen-content">
+    <div class="section-title">Language & Voice</div>
+    <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-size:14px;font-weight:500;color:#2D3436">Language</div><div style="font-size:14px;color:#7C6FE0;font-weight:600">English ›</div></div><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px;font-weight:500;color:#2D3436">Voice</div><div style="font-size:14px;color:#7C6FE0;font-weight:600">Luna — Warm & Professional ›</div></div></div>
+    <div class="section-title">Personality</div>
+    <div class="card"><div style="font-size:14px;font-weight:500;color:#2D3436;margin-bottom:12px">Communication Style</div><div style="display:flex;justify-content:space-between;font-size:12px;color:#636E72;margin-bottom:6px"><span>Formal</span><span>Friendly</span></div><div style="width:100%;height:6px;background:#E0E0E0;border-radius:3px;position:relative"><div style="width:65%;height:100%;background:linear-gradient(90deg,#1A1B4B,#7C6FE0);border-radius:3px"></div><div style="position:absolute;top:-5px;left:63%;width:16px;height:16px;background:#7C6FE0;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.2)"></div></div><div style="font-size:13px;color:#636E72;margin-top:10px;text-align:center">Balanced, leaning friendly</div></div>
+    <div class="section-title">Autonomy</div>
+    <div class="card"><div style="font-size:15px;font-weight:600;color:#1A1B4B;margin-bottom:10px">Current Trust Level: 45</div><div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div><div style="margin-top:16px;display:flex;flex-direction:column;gap:10px"><div style="font-size:13px;color:#B0B0B0;padding:8px 12px;background:#F8F9FA;border-radius:6px"><strong>0-30:</strong> Luna always asks first</div><div style="font-size:13px;color:#1A1B4B;padding:8px 12px;background:#F0EDFF;border-radius:6px;border:1px solid #7C6FE0"><strong>30-60:</strong> Luna acts on known patterns <span style="color:#7C6FE0;font-weight:600">← You are here</span></div><div style="font-size:13px;color:#B0B0B0;padding:8px 12px;background:#F8F9FA;border-radius:6px"><strong>60-80:</strong> Luna acts within cost limits</div><div style="font-size:13px;color:#B0B0B0;padding:8px 12px;background:#F8F9FA;border-radius:6px"><strong>80+:</strong> Luna acts almost fully autonomous</div></div><button class="btn danger" style="margin-top:16px;padding:10px;font-size:13px">Reset Trust Level</button></div>
+  </div>
+</div>
+
+<!-- SCREEN 27: Notifications -->
+<div class="screen" id="screen-notifications" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Notifications</span></div>
+  <div class="screen-content">
+    <div class="section-title">Alert Types</div>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">📞 Call notifications</span></label>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">✅ Task updates</span></label>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">📧 Email summaries</span></label>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">⚡ Urgent calls</span></label>
+    <div class="card" style="margin-left:20px;margin-top:4px"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:14px;font-weight:500;color:#2D3436">Urgency threshold</div><div style="font-size:14px;color:#7C6FE0;font-weight:600">High only ›</div></div></div>
+    <div class="section-title">Delivery Channels</div>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">📱 Push notifications</span></label>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">📧 Email</span></label>
+    <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span><span class="toggle-label">💬 WhatsApp</span></label>
+    <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span><span class="toggle-label">📱 SMS</span></label>
+    <div class="section-title">Quiet Hours</div>
+    <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span><span class="toggle-label">🌙 Enable quiet hours</span></label>
+    <div class="card" style="opacity:0.5"><div style="font-size:14px;color:#636E72;line-height:1.6">From 11:00 PM to 7:00 AM — Only urgent calls will notify you</div></div>
+  </div>
+</div>
+
+<!-- SCREEN 28: Phone & Luna Number -->
+<div class="screen" id="screen-phone-number" data-tab="settings">
+  <div class="screen-header"><button class="back-btn" onclick="goBack()">&larr;</button><span>Phone & Luna Number</span></div>
+  <div class="screen-content">
+    <div class="card" style="text-align:center;border:2px solid #7C6FE0;background:linear-gradient(135deg,#F8F9FA,#F0EDFF)"><div style="font-size:14px;font-weight:500;color:#636E72;margin-bottom:8px">Your Luna Number</div><div style="font-size:28px;font-weight:700;color:#1A1B4B;margin-bottom:10px;letter-spacing:1px">+971 58 234 5678</div><span class="badge success">Active</span><div style="margin-top:14px"><button class="btn outline" style="display:inline-block;width:auto;padding:10px 20px;font-size:13px">📋 Copy Number</button></div></div>
+    <div class="section-title">Call Forwarding</div>
+    <div class="card"><div style="font-size:14px;color:#2D3436;line-height:1.6">Forward your calls to Luna when you're busy or can't answer. Luna will handle them professionally and notify you.</div></div>
+    <div class="section-title">Setup Instructions</div>
+    <div class="card"><div style="font-size:15px;font-weight:600;color:#1A1B4B;margin-bottom:10px">📱 iPhone</div><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#2D3436;line-height:1.5">1. Open Settings → Phone → Call Forwarding</div><div style="font-size:13px;color:#2D3436;line-height:1.5">2. Toggle on Call Forwarding</div><div style="font-size:13px;color:#2D3436;line-height:1.5">3. Enter number: +971 58 234 5678</div></div></div>
+    <div class="card"><div style="font-size:15px;font-weight:600;color:#1A1B4B;margin-bottom:10px">🤖 Android</div><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#2D3436;line-height:1.5">1. Open Phone app → ⋮ → Settings → Calls</div><div style="font-size:13px;color:#2D3436;line-height:1.5">2. Tap Call Forwarding → When unanswered</div><div style="font-size:13px;color:#2D3436;line-height:1.5">3. Enter: +971 58 234 5678</div></div></div>
+    <div class="card"><div style="font-size:15px;font-weight:600;color:#1A1B4B;margin-bottom:10px">📞 Quick Code (Etisalat)</div><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:14px;color:#2D3436;font-family:monospace;background:#F8F9FA;padding:8px 12px;border-radius:6px">Dial: *61*+97158234567#</div><div style="font-size:14px;color:#2D3436;font-family:monospace;background:#F8F9FA;padding:8px 12px;border-radius:6px">To cancel: ##61#</div></div></div>
+    <button class="btn secondary" style="margin-top:16px">🧪 Test Call Forwarding</button>
+    <div style="text-align:center;margin-top:12px"><div style="font-size:12px;color:#636E72">Call your own number to test — Luna should pick up</div></div>
+  </div>
+</div>
+
+  </div><!-- /screen-container -->
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="home" onclick="switchTab('home')">
+      <span class="nav-icon">🏠</span>Home
+    </button>
+    <button class="nav-item" data-tab="calls" onclick="switchTab('calls')">
+      <span class="nav-icon">📞</span>Calls
+    </button>
+    <button class="nav-item" data-tab="chat" onclick="switchTab('chat')">
+      <span class="nav-icon">💬</span>Chat
+    </button>
+    <button class="nav-item" data-tab="tasks" onclick="switchTab('tasks')">
+      <span class="nav-icon">✅</span>Tasks
+    </button>
+    <button class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+      <span class="nav-icon">⚙️</span>Settings
+    </button>
+  </nav>
+</div><!-- /phone-frame -->
+
+<script>
+// === NAVIGATION ===
+const history = [];
+const tabRoots = {
+  home: 'dashboard',
+  calls: 'calls-list',
+  chat: 'chat',
+  tasks: 'tasks-list',
+  settings: 'settings'
+};
+let currentTab = 'home';
+
+function showScreen(id) {
+  const current = document.querySelector('.screen.active');
+  if (current) {
+    history.push(current.id.replace('screen-', ''));
+    current.classList.remove('active');
+    current.style.animation = '';
+  }
+  const next = document.getElementById('screen-' + id);
+  if (next) {
+    next.classList.add('active');
+    next.style.animation = 'fadeIn .25s ease';
+    // Update bottom nav
+    const tab = next.dataset.tab;
+    if (tab && tab !== 'onboarding') {
+      currentTab = tab;
+      updateNav(tab);
+    }
+    // Scroll to top
+    const content = next.querySelector('.screen-content');
+    if (content) content.scrollTop = 0;
+  }
+}
+
+function goBack() {
+  if (history.length > 0) {
+    const prev = history.pop();
+    const current = document.querySelector('.screen.active');
+    if (current) {
+      current.classList.remove('active');
+      current.style.animation = '';
+    }
+    const prevScreen = document.getElementById('screen-' + prev);
+    if (prevScreen) {
+      prevScreen.classList.add('active');
+      prevScreen.style.animation = 'fadeInReverse .25s ease';
+      const tab = prevScreen.dataset.tab;
+      if (tab && tab !== 'onboarding') updateNav(tab);
+    }
+  }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  history.length = 0; // Clear history on tab switch
+  const current = document.querySelector('.screen.active');
+  if (current) {
+    current.classList.remove('active');
+    current.style.animation = '';
+  }
+  const root = tabRoots[tab];
+  const screen = document.getElementById('screen-' + root);
+  if (screen) {
+    screen.classList.add('active');
+    screen.style.animation = 'fadeIn .2s ease';
+    const content = screen.querySelector('.screen-content');
+    if (content) content.scrollTop = 0;
+  }
+  updateNav(tab);
+}
+
+function updateNav(tab) {
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.tab === tab);
+  });
+}
+
+// Start with welcome screen
+document.getElementById('screen-welcome').classList.add('active');
+
+// Tab bar switching (in-screen tabs)
+document.querySelectorAll('.tab-bar .tab').forEach(tab => {
+  tab.addEventListener('click', function() {
+    this.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

@@ -2,385 +2,525 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Luna - e& App WebView Mockup</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luna AI – Mockup Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--pri:#1A1B4B;--sec:#7C6FE0;--acc:#F5B731;--ok:#2ECC71;--err:#E74C3C;--bg:#F8F9FA;--txt:#2D3436;--txt2:#636E72;--w:#FFF;--r:12px;--br:8px}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Inter",-apple-system,sans-serif;background:#E8E8ED;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.phone{width:375px;height:812px;background:var(--w);border-radius:44px;overflow:hidden;position:relative;box-shadow:0 25px 80px rgba(0,0,0,.3),0 0 0 3px #1a1a1a,0 0 0 6px #333}
-.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:34px;background:#1a1a1a;border-radius:0 0 22px 22px;z-index:200}
-.notch::after{content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#333;border-radius:50%}
-.ebar{height:54px;background:var(--pri);display:flex;align-items:flex-end;padding:0 16px 8px;justify-content:space-between;position:relative;z-index:50}
-.ebar .logo{font-size:15px;font-weight:700;color:var(--w);letter-spacing:.5px}
-.ebar .logo span{color:var(--acc)}
-.ebar .status{display:flex;gap:3px;align-items:center;color:var(--w);font-size:11px;font-weight:500}
-.screen{position:absolute;top:0;left:0;width:100%;height:100%;transition:transform .4s cubic-bezier(.4,0,.2,1),opacity .4s ease;opacity:0;pointer-events:none;transform:translateX(100%);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-.screen.active{opacity:1;pointer-events:all;transform:translateX(0);z-index:10}
-.screen.exit-left{transform:translateX(-30%);opacity:.3;z-index:5}
-.hdr{height:50px;background:var(--pri);display:flex;align-items:center;padding:0 12px;color:var(--w);position:sticky;top:0;z-index:50}
-.hdr .back{background:none;border:none;color:var(--w);font-size:22px;cursor:pointer;padding:8px;line-height:1;display:flex;align-items:center}
-.hdr .ttl{font-size:17px;font-weight:600;margin-left:4px}
-.pad{padding:20px}
-.btn{display:block;width:100%;padding:15px;border:none;border-radius:var(--br);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
-.btn-p{background:var(--sec);color:var(--w)}.btn-p:hover{background:#6B5ED0;transform:translateY(-1px)}
-.btn-a{background:var(--acc);color:var(--pri)}.btn-a:hover{background:#E5A721}
-.btn-o{background:transparent;color:var(--sec);border:2px solid var(--sec)}
-.btn-g{background:var(--ok);color:var(--w)}
-.btn:active{transform:scale(.97)}
-.card{background:var(--w);border-radius:var(--r);padding:20px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
-input[type=tel],input[type=text]{width:100%;padding:14px 16px;border:2px solid #E0E0E0;border-radius:var(--br);font-family:inherit;font-size:16px;outline:none;transition:border .2s}
-input:focus{border-color:var(--sec)}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes checkPop{0%{transform:scale(0) rotate(-45deg);opacity:0}50%{transform:scale(1.2) rotate(0deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
-@keyframes countUp{from{opacity:0}to{opacity:1}}
-.fadeUp{animation:fadeUp .5s ease both}
-.fadeUp2{animation:fadeUp .5s ease .1s both}
-.fadeUp3{animation:fadeUp .5s ease .2s both}
-.fadeUp4{animation:fadeUp .5s ease .3s both}
-.spinner{width:48px;height:48px;border:4px solid #E0E0E0;border-top-color:var(--sec);border-radius:50%;animation:spin 1s linear infinite}
-.hero-grad{background:linear-gradient(135deg,var(--pri) 0%,#2D2E6B 50%,var(--sec) 100%);color:var(--w);padding:40px 24px 30px;text-align:center}
-.hero-grad h1{font-size:28px;font-weight:700;margin-bottom:8px;letter-spacing:-.5px}
-.hero-grad p{font-size:14px;opacity:.85;line-height:1.5}
-.luna-orb{width:80px;height:80px;background:radial-gradient(circle at 30% 30%,var(--acc),#E89B00);border-radius:50%;margin:0 auto 16px;box-shadow:0 8px 30px rgba(245,183,49,.4);display:flex;align-items:center;justify-content:center;font-size:32px}
-.feature-row{display:flex;gap:10px;margin-top:20px}
-.feat{flex:1;background:rgba(255,255,255,.12);border-radius:var(--r);padding:14px 8px;text-align:center}
-.feat .icon{font-size:24px;margin-bottom:6px}
-.feat .label{font-size:11px;font-weight:500;opacity:.9}
-.plan-card{background:var(--w);border-radius:var(--r);padding:18px;margin-bottom:12px;border:2px solid transparent;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.plan-card:hover{border-color:var(--sec);transform:translateY(-2px);box-shadow:0 4px 20px rgba(124,111,224,.15)}
-.plan-card.popular{border-color:var(--sec)}
-.plan-card.popular::before{content:"POPULAR";position:absolute;top:12px;right:-28px;background:var(--sec);color:var(--w);font-size:9px;font-weight:700;padding:3px 30px;transform:rotate(45deg);letter-spacing:1px}
-.plan-name{font-size:18px;font-weight:700;color:var(--pri)}
-.plan-price{font-size:24px;font-weight:700;color:var(--sec);margin:6px 0}
-.plan-price span{font-size:13px;color:var(--txt2);font-weight:400}
-.plan-features{list-style:none;margin:10px 0 14px}
-.plan-features li{font-size:13px;color:var(--txt2);padding:3px 0;padding-left:20px;position:relative}
-.plan-features li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
-.otp-inputs{display:flex;gap:8px;justify-content:center;margin:24px 0}
-.otp-inputs input{width:48px;height:56px;text-align:center;font-size:24px;font-weight:700;border:2px solid #E0E0E0;border-radius:var(--br);outline:none;font-family:inherit;transition:border .2s}
-.otp-inputs input:focus{border-color:var(--sec);background:#F5F3FF}
-.otp-inputs input.filled{border-color:var(--sec);background:#F5F3FF}
-.success-circle{width:100px;height:100px;background:var(--ok);border-radius:50%;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;animation:checkPop .6s ease both}
-.success-circle svg{width:50px;height:50px}
-.timer-circle{width:80px;height:80px;border-radius:50%;border:4px solid #E0E0E0;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;position:relative}
-.timer-circle .time{font-size:22px;font-weight:700;color:var(--pri)}
-.timer-ring{position:absolute;top:-4px;left:-4px;width:80px;height:80px}
-.timer-ring circle{fill:none;stroke:var(--sec);stroke-width:4;stroke-dasharray:238;stroke-dashoffset:0;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset 1s linear}
-.info-box{background:#F0EDFF;border-radius:var(--br);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;margin:16px 0}
-.info-box .ii{color:var(--sec);font-size:18px;flex-shrink:0}
-.info-box p{font-size:13px;color:var(--txt);line-height:1.5}
-.detail-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F0F0F0}
-.detail-row .dl{font-size:14px;color:var(--txt2)}
-.detail-row .dv{font-size:14px;font-weight:600;color:var(--txt)}
+:root {
+  --pri: #1A1B4B;
+  --sec: #7C6FE0;
+  --acc: #F5B731;
+  --ok: #2ECC71;
+  --bg: #F4F3FA;
+  --w: #FFFFFF;
+  --txt: #2D3436;
+  --txt2: #636E72;
+  --r: 16px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--txt); min-height: 100vh; }
+
+/* ── Header ─────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, var(--pri) 0%, #2D1B69 50%, var(--sec) 100%);
+  padding: 48px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  left: -30%;
+  width: 160%;
+  height: 160%;
+  background: radial-gradient(circle at 40% 50%, rgba(245,183,49,.12) 0%, transparent 55%);
+  animation: drift 12s ease-in-out infinite alternate;
+}
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(40px); } }
+
+.logo-orb {
+  width: 72px;
+  height: 72px;
+  background: radial-gradient(circle at 35% 35%, var(--acc), #E89B00, var(--sec));
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  box-shadow: 0 8px 32px rgba(245,183,49,.35);
+  position: relative;
+  z-index: 1;
+}
+.header h1 {
+  color: var(--w);
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+.header p {
+  color: rgba(255,255,255,.7);
+  font-size: 15px;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Grid ───────────────────────────────── */
+.grid-section {
+  max-width: 1100px;
+  margin: -32px auto 0;
+  padding: 0 24px 60px;
+  position: relative;
+  z-index: 2;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+/* ── Card ───────────────────────────────── */
+.card {
+  background: var(--w);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  transition: transform .25s ease, box-shadow .25s ease;
+  display: flex;
+  flex-direction: column;
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(124,111,224,.15);
+}
+.card-thumb {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.card-thumb.etisalat-mobile {
+  background: linear-gradient(135deg, var(--pri), #2D1B69);
+}
+.card-thumb.etisalat-desktop {
+  background: linear-gradient(135deg, #0C0C2D, var(--pri));
+}
+.card-thumb.luna-app {
+  background: linear-gradient(135deg, var(--sec), #9B8FFF);
+}
+
+/* Mini phone frame in thumbnail */
+.mini-phone {
+  width: 100px;
+  height: 200px;
+  background: var(--w);
+  border-radius: 20px;
+  border: 3px solid #333;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.mini-phone .mp-notch {
+  width: 50px;
+  height: 12px;
+  background: #333;
+  border-radius: 0 0 10px 10px;
+  margin: 0 auto;
+}
+.mini-phone .mp-bar {
+  height: 20px;
+  background: var(--pri);
+}
+.mini-phone .mp-content {
+  padding: 6px;
+}
+.mini-phone .mp-line {
+  height: 4px;
+  background: #E0E0E0;
+  border-radius: 2px;
+  margin-bottom: 4px;
+}
+.mini-phone .mp-line.accent { background: var(--sec); width: 60%; }
+.mini-phone .mp-line.gold { background: var(--acc); width: 80%; }
+.mini-phone .mp-block {
+  height: 20px;
+  background: #F0EDFF;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+/* Mini desktop frame */
+.mini-desktop {
+  width: 200px;
+  height: 140px;
+  background: var(--w);
+  border-radius: 8px;
+  border: 3px solid #333;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.mini-desktop::after {
+  content: "";
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 16px;
+  background: #444;
+  border-radius: 0 0 4px 4px;
+}
+.mini-desktop .md-bar {
+  height: 16px;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  gap: 3px;
+}
+.mini-desktop .md-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #555;
+}
+.mini-desktop .md-content {
+  padding: 6px;
+}
+.mini-desktop .md-hero {
+  height: 30px;
+  background: linear-gradient(135deg, var(--pri), var(--sec));
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+.mini-desktop .md-cols {
+  display: flex;
+  gap: 3px;
+}
+.mini-desktop .md-col {
+  flex: 1;
+  height: 50px;
+  background: #F0F0F0;
+  border-radius: 3px;
+}
+
+/* Mini app frame */
+.mini-app {
+  width: 100px;
+  height: 200px;
+  background: var(--w);
+  border-radius: 20px;
+  border: 3px solid #333;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.mini-app .ma-notch {
+  width: 50px;
+  height: 12px;
+  background: #333;
+  border-radius: 0 0 10px 10px;
+  margin: 0 auto;
+}
+.mini-app .ma-header {
+  height: 20px;
+  background: var(--pri);
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+}
+.mini-app .ma-title {
+  font-size: 5px;
+  color: var(--w);
+  font-weight: 700;
+}
+.mini-app .ma-content {
+  padding: 6px;
+}
+.mini-app .ma-chat-bubble {
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 4px;
+  margin-bottom: 3px;
+  max-width: 80%;
+}
+.mini-app .ma-chat-bubble.luna {
+  background: #F0EDFF;
+  color: var(--sec);
+}
+.mini-app .ma-chat-bubble.user {
+  background: var(--sec);
+  color: var(--w);
+  margin-left: auto;
+}
+.mini-app .ma-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 18px;
+  background: var(--w);
+  border-top: 1px solid #E0E0E0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.mini-app .ma-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #D0D0D0;
+}
+.mini-app .ma-nav-dot.active { background: var(--sec); }
+
+.card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.badge-new {
+  background: var(--acc);
+  color: var(--pri);
+}
+.badge-live {
+  background: var(--ok);
+  color: var(--w);
+}
+
+.card-body {
+  padding: 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--sec);
+  margin-bottom: 6px;
+}
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--pri);
+  margin-bottom: 8px;
+}
+.card-desc {
+  font-size: 14px;
+  color: var(--txt2);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  flex: 1;
+}
+.card-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.meta-tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--txt2);
+}
+.meta-tag .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.dot-mobile { background: var(--sec); }
+.dot-desktop { background: var(--acc); }
+.dot-screens { background: var(--ok); }
+
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--sec), #5B4FC7);
+  color: var(--w);
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+}
+.card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124,111,224,.3);
+}
+.card-btn.gold {
+  background: linear-gradient(135deg, var(--acc), #E8A020);
+  color: var(--pri);
+}
+
+/* ── Footer ─────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  border-top: 1px solid #E0E0E0;
+}
+.footer p {
+  font-size: 13px;
+  color: var(--txt2);
+  line-height: 1.6;
+}
+.footer a {
+  color: var(--sec);
+  text-decoration: none;
+}
+
+/* ── Responsive ─────────────────────────── */
+@media (max-width: 640px) {
+  .header { padding: 36px 16px 44px; }
+  .header h1 { font-size: 26px; }
+  .grid { grid-template-columns: 1fr; }
+  .grid-section { padding: 0 16px 40px; }
+}
 </style>
 </head>
 <body>
-<div class="phone">
-<div class="notch"></div>
-<!-- A1 LANDING -->
-<div class="screen active" id="s-landing">
-  <div class="ebar"><div class="logo">e<span>&</span></div><div class="status">9:41</div></div>
-  <div class="hero-grad">
-    <div class="luna-orb fadeUp">&#9790;</div>
-    <h1 class="fadeUp2">Meet Luna</h1>
-    <p class="fadeUp3">Your Personal AI Assistant.<br>Manages calls, schedules, tasks &amp; more.</p>
-    <div class="feature-row fadeUp4">
-      <div class="feat"><div class="icon">&#128222;</div><div class="label">Smart Calls</div></div>
-      <div class="feat"><div class="icon">&#128197;</div><div class="label">Calendar</div></div>
-      <div class="feat"><div class="icon">&#9989;</div><div class="label">Tasks</div></div>
-      <div class="feat"><div class="icon">&#128269;</div><div class="label">Research</div></div>
-    </div>
-  </div>
-  <div class="pad">
-    <div class="card fadeUp3" style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <div style="width:40px;height:40px;background:#F0EDFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">&#128161;</div>
-        <div>
-          <div style="font-size:15px;font-weight:600;color:var(--pri)">AI That Works For You</div>
-          <div style="font-size:12px;color:var(--txt2)">Powered by advanced AI models</div>
+
+<!-- ── Header ──────────────────────────────────── -->
+<header class="header">
+  <div class="logo-orb">&#9790;</div>
+  <h1>Luna AI Mockups</h1>
+  <p>Interactive prototypes for the Luna AI Assistant — Etisalat purchase flow and the Luna app experience.</p>
+</header>
+
+<!-- ── Mockup Grid ─────────────────────────────── -->
+<section class="grid-section">
+  <div class="grid">
+
+    <!-- Card 1: Luna App -->
+    <div class="card">
+      <div class="card-thumb luna-app">
+        <div class="mini-app">
+          <div class="ma-notch"></div>
+          <div class="ma-header"><span class="ma-title">LUNA</span></div>
+          <div class="ma-content">
+            <div class="ma-chat-bubble luna">Hi! I'm Luna &#9790;</div>
+            <div class="ma-chat-bubble user">Book a flight</div>
+            <div class="ma-chat-bubble luna">On it! Searching...</div>
+            <div class="ma-chat-bubble luna">Found 3 flights</div>
+            <div class="ma-chat-bubble user">The Emirates one</div>
+          </div>
+          <div class="ma-nav">
+            <div class="ma-nav-dot"></div>
+            <div class="ma-nav-dot"></div>
+            <div class="ma-nav-dot active"></div>
+            <div class="ma-nav-dot"></div>
+            <div class="ma-nav-dot"></div>
+          </div>
         </div>
+        <span class="card-badge badge-new">NEW</span>
       </div>
-      <p style="font-size:13px;color:var(--txt2);line-height:1.6">Luna answers your calls, summarizes conversations, books appointments, and handles tasks autonomously - all through natural conversation.</p>
-    </div>
-    <div class="card fadeUp4" style="margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:40px;height:40px;background:#E8F8F0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">&#128274;</div>
-        <div>
-          <div style="font-size:15px;font-weight:600;color:var(--pri)">Secure &amp; Private</div>
-          <div style="font-size:12px;color:var(--txt2)">Your data stays yours. Always.</div>
+      <div class="card-body">
+        <div class="card-label">Luna App</div>
+        <div class="card-title">AI Assistant Experience</div>
+        <p class="card-desc">Full interactive mockup of the Luna app — chat, tasks, calls, email, settings. Shows the maximum "Assistant" tier (600 AED/month) with all features.</p>
+        <div class="card-meta">
+          <span class="meta-tag"><span class="dot dot-mobile"></span> Mobile (iOS/Android)</span>
+          <span class="meta-tag"><span class="dot dot-screens"></span> 28 Screens</span>
         </div>
+        <a class="card-btn gold" href="luna-app.html">Open Luna App &#8594;</a>
       </div>
     </div>
-    <button class="btn btn-a" onclick="goTo('s-tier')" style="font-size:17px;padding:16px">Get Started &#8594;</button>
-    <p style="text-align:center;font-size:12px;color:var(--txt2);margin-top:12px">Billed via your Etisalat account</p>
-  </div>
-</div>
 
-<!-- A2 TIER SELECTION -->
-<div class="screen" id="s-tier">
-  <div class="ebar"><div class="logo">e<span>&</span></div><div class="status">9:41</div></div>
-  <div class="hdr"><button class="back" onclick="goTo('s-landing',true)">&#8592;</button><div class="ttl">Choose Your Plan</div></div>
-  <div class="pad">
-    <div class="plan-card" onclick="selectPlan(this,'Trial','Free')">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="plan-name">Trial</div>
-        <span class="badge" style="background:#E8F8F0;color:var(--ok)">7 Days Free</span>
+    <!-- Card 2: Etisalat Mobile -->
+    <div class="card">
+      <div class="card-thumb etisalat-mobile">
+        <div class="mini-phone">
+          <div class="mp-notch"></div>
+          <div class="mp-bar"></div>
+          <div class="mp-content">
+            <div class="mp-block"></div>
+            <div class="mp-line gold"></div>
+            <div class="mp-line"></div>
+            <div class="mp-line accent"></div>
+            <div class="mp-block"></div>
+            <div class="mp-line gold"></div>
+            <div class="mp-line"></div>
+          </div>
+        </div>
+        <span class="card-badge badge-live">LIVE</span>
       </div>
-      <div class="plan-price">Free <span>/ 7 days</span></div>
-      <ul class="plan-features"><li>Basic AI Chat</li><li>5 calls/day</li><li>Task management</li></ul>
-      <button class="btn btn-o btn-sm">Select Trial</button>
-    </div>
-    <div class="plan-card" onclick="selectPlan(this,'Basic','100 AED')">
-      <div class="plan-name">Basic</div>
-      <div class="plan-price">100 <span>AED/month</span></div>
-      <ul class="plan-features"><li>Full AI Chat</li><li>20 calls/day</li><li>Calendar sync</li><li>Email agent</li></ul>
-      <button class="btn btn-o btn-sm">Select Basic</button>
-    </div>
-    <div class="plan-card popular" onclick="selectPlan(this,'Plus','200 AED')">
-      <div class="plan-name">Plus</div>
-      <div class="plan-price">200 <span>AED/month</span></div>
-      <ul class="plan-features"><li>Everything in Basic</li><li>Unlimited calls</li><li>Travel agent</li><li>Research agent</li><li>Priority support</li></ul>
-      <button class="btn btn-p btn-sm">Select Plus</button>
-    </div>
-    <div class="plan-card" onclick="selectPlan(this,'Pro','350 AED')">
-      <div class="plan-name">Pro</div>
-      <div class="plan-price">350 <span>AED/month</span></div>
-      <ul class="plan-features"><li>Everything in Plus</li><li>Voice cloning</li><li>Advanced agents</li><li>API access</li></ul>
-      <button class="btn btn-o btn-sm">Select Pro</button>
-    </div>
-    <div class="plan-card" onclick="selectPlan(this,'Assistant','600 AED')">
-      <div class="plan-name">Assistant</div>
-      <div class="plan-price">600 <span>AED/month</span></div>
-      <ul class="plan-features"><li>Everything in Pro</li><li>Full autonomy mode</li><li>Multi-device</li><li>Dedicated support</li></ul>
-      <button class="btn btn-o btn-sm">Select Assistant</button>
-    </div>
-  </div>
-</div>
-
-<!-- A3 MSISDN -->
-<div class="screen" id="s-msisdn">
-  <div class="ebar"><div class="logo">e<span>&</span></div><div class="status">9:41</div></div>
-  <div class="hdr"><button class="back" onclick="goTo('s-tier',true)">&#8592;</button><div class="ttl">Enter Your Number</div></div>
-  <div class="pad" style="padding-top:30px">
-    <div style="text-align:center;margin-bottom:30px">
-      <div style="width:64px;height:64px;background:#F0EDFF;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:28px">&#128241;</div>
-      <h2 style="font-size:20px;font-weight:700;color:var(--pri);margin-bottom:6px">Verify Your Number</h2>
-      <p style="font-size:13px;color:var(--txt2);line-height:1.5">We'll send a one-time code to confirm<br>your Etisalat number.</p>
-    </div>
-    <div style="margin-bottom:20px">
-      <label style="font-size:13px;font-weight:600;color:var(--txt);display:block;margin-bottom:6px">Mobile Number</label>
-      <div style="display:flex;gap:8px">
-        <div style="background:#F0F0F0;border:2px solid #E0E0E0;border-radius:var(--br);padding:14px 12px;font-size:16px;font-weight:600;color:var(--pri);white-space:nowrap">+971</div>
-        <input type="tel" id="phone-input" placeholder="5X XXX XXXX" maxlength="11" oninput="formatPhone(this)">
+      <div class="card-body">
+        <div class="card-label">Etisalat DCB</div>
+        <div class="card-title">Mobile Purchase Flow</div>
+        <p class="card-desc">WebView mockup for the e& app integration — plan selection, phone verification (OTP), subscription activation via Direct Carrier Billing.</p>
+        <div class="card-meta">
+          <span class="meta-tag"><span class="dot dot-mobile"></span> Mobile WebView</span>
+          <span class="meta-tag"><span class="dot dot-screens"></span> 9 Screens</span>
+        </div>
+        <a class="card-btn" href="etisalat-mobile.html">Open Mobile Flow &#8594;</a>
       </div>
     </div>
-    <div class="info-box">
-      <div class="ii">&#9432;</div>
-      <p>Your selected plan (<strong id="selected-plan-name">Plus</strong> - <strong id="selected-plan-price">200 AED</strong>/mo) will be billed to your Etisalat account.</p>
+
+    <!-- Card 3: Etisalat Desktop -->
+    <div class="card">
+      <div class="card-thumb etisalat-desktop">
+        <div class="mini-desktop">
+          <div class="md-bar">
+            <div class="md-dot"></div>
+            <div class="md-dot"></div>
+            <div class="md-dot"></div>
+          </div>
+          <div class="md-content">
+            <div class="md-hero"></div>
+            <div class="md-cols">
+              <div class="md-col"></div>
+              <div class="md-col"></div>
+              <div class="md-col"></div>
+            </div>
+          </div>
+        </div>
+        <span class="card-badge badge-live">LIVE</span>
+      </div>
+      <div class="card-body">
+        <div class="card-label">Etisalat DCB</div>
+        <div class="card-title">Desktop Landing Page</div>
+        <p class="card-desc">Full-width landing page for luna.ae — plan comparison, subscription form, OTP verification. Optimized for desktop browsers.</p>
+        <div class="card-meta">
+          <span class="meta-tag"><span class="dot dot-desktop"></span> Desktop</span>
+          <span class="meta-tag"><span class="dot dot-screens"></span> Full Page</span>
+        </div>
+        <a class="card-btn" href="desktop.html">Open Desktop Page &#8594;</a>
+      </div>
     </div>
-    <button class="btn btn-p" onclick="sendOtp()" id="send-otp-btn" style="margin-top:20px">Send OTP</button>
-    <p style="text-align:center;font-size:11px;color:var(--txt2);margin-top:16px;line-height:1.5">By continuing, you agree to Luna's <a href="#" style="color:var(--sec)">Terms of Service</a> and <a href="#" style="color:var(--sec)">Privacy Policy</a>.</p>
+
   </div>
-</div>
+</section>
 
-<!-- A4 OTP WAIT -->
-<div class="screen" id="s-otp-wait">
-  <div class="ebar"><div class="logo">e<span>&</span></div><div class="status">9:41</div></div>
-  <div class="hdr"><button class="back" onclick="goTo('s-msisdn',true)">&#8592;</button><div class="ttl">Sending OTP</div></div>
-  <div class="pad" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:500px;text-align:center">
-    <div class="spinner" style="margin-bottom:24px"></div>
-    <h2 style="font-size:20px;font-weight:700;color:var(--pri);margin-bottom:8px">Sending OTP...</h2>
-    <p style="font-size:14px;color:var(--txt2);margin-bottom:4px">A verification code is being sent to</p>
-    <p style="font-size:16px;font-weight:600;color:var(--pri)" id="otp-phone-display">+971 5X XXX XXXX</p>
-    <p style="font-size:12px;color:var(--txt2);margin-top:20px">This may take a few seconds...</p>
-  </div>
-</div>
+<!-- ── Footer ──────────────────────────────────── -->
+<footer class="footer">
+  <p>&copy; 2026 AC AI Convergence LLC — Luna AI Assistant<br>
+  <a href="https://github.com/adnim100/luna-mockup" target="_blank">GitHub Repository</a></p>
+</footer>
 
-<!-- A5 OTP INPUT -->
-<div class="screen" id="s-otp">
-  <div class="ebar"><div class="logo">e<span>&</span></div><div class="status">9:42</div></div>
-  <div class="hdr"><button class="back" onclick="goTo('s-msisdn',true)">&#8592;</button><div class="ttl">Enter OTP</div></div>
-  <div class="pad" style="padding-top:30px;text-align:center">
-    <div class="timer-circle" style="margin-bottom:20px">
-      <svg class="timer-ring" viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" id="timer-path"/></svg>
-      <div class="time" id="timer-text">4:59</div>
-    </div>
-    <h2 style="font-size:20px;font-weight:700;color:var(--pri);margin-bottom:6px">Enter Verification Code</h2>
-    <p style="font-size:13px;color:var(--txt2);margin-bottom:6px">Code sent to <strong id="otp-phone-display2">+971 5X XXX XXXX</strong></p>
-    <div class="otp-inputs" id="otp-box">
-      <input type="text" maxlength="1" inputmode="numeric" onfocus="this.select()" oninput="otpNext(this,0)">
-      <input type="text" maxlength="1" inputmode="numeric" onfocus="this.select()" oninput="otpNext(this,1)">
-      <input type="text" maxlength="1" inputmode="numeric" onfocus="this.select()" oninput="otpNext(this,2)">
-      <input type="text" maxlength="1" inputmode="numeric" onfocus="this.select()" oninput="otpNext(this,3)">
-      <input type="text" maxlength="1" inputmode="numeric" onfocus="this.select()" oninput="otpNext(this,4)">
-      <input type="text" maxlength="1" inputmode="numeric" onfocus="this.select()" oninput="otpNext(this,5)">
-    </div>
-    <button class="btn btn-p" onclick="confirmOtp()" id="confirm-otp-btn" style="margin-top:10px">Confirm</button>
-    <div style="margin-top:20px">
-      <p style="font-size:13px;color:var(--txt2)">Didn't receive the code?</p>
-      <button style="background:none;border:none;color:var(--sec);font-size:14px;font-weight:600;cursor:pointer;padding:8px;font-family:inherit" id="resend-btn" onclick="resendOtp()">Resend OTP</button>
-    </div>
-    <div id="otp-error" style="display:none;margin-top:14px;background:#FEF0F0;border-radius:var(--br);padding:12px;color:var(--err);font-size:13px;font-weight:500"></div>
-  </div>
-</div>
-
-<!-- A6 CONFIRMATION -->
-<div class="screen" id="s-confirm">
-  <div class="ebar"><div class="logo">e<span>&</span></div><div class="status">9:42</div></div>
-  <div class="pad" style="padding-top:60px;text-align:center">
-    <div class="success-circle">
-      <svg viewBox="0 0 50 50" fill="none"><path d="M14 26l8 8 14-16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <h2 style="font-size:24px;font-weight:700;color:var(--pri);margin-bottom:8px" class="fadeUp">Subscription Active!</h2>
-    <p style="font-size:14px;color:var(--txt2);margin-bottom:30px" class="fadeUp2">Welcome to Luna AI. Your plan is now active.</p>
-    <div class="card fadeUp3" style="text-align:left;margin-bottom:20px">
-      <div style="font-size:13px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px">Subscription Details</div>
-      <div class="detail-row"><div class="dl">Plan</div><div class="dv" id="conf-plan">Plus</div></div>
-      <div class="detail-row"><div class="dl">Price</div><div class="dv" id="conf-price">200 AED/month</div></div>
-      <div class="detail-row"><div class="dl">Billing</div><div class="dv">Etisalat Account</div></div>
-      <div class="detail-row"><div class="dl">Next Billing</div><div class="dv" id="conf-next">April 9, 2026</div></div>
-      <div class="detail-row" style="border:none"><div class="dl">Status</div><div class="dv" style="color:var(--ok)">&#9679; Active</div></div>
-    </div>
-    <div class="info-box fadeUp3" style="text-align:left">
-      <div class="ii">&#128232;</div>
-      <p>A confirmation SMS has been sent to your number. You can manage your subscription in the e&amp; app settings.</p>
-    </div>
-    <button class="btn btn-a fadeUp4" style="margin-top:24px;font-size:17px;padding:16px" onclick="resetDemo()">Download Luna App &#8594;</button>
-    <button class="btn btn-o fadeUp4" style="margin-top:10px" onclick="resetDemo()">Continue in Browser</button>
-    <p style="font-size:11px;color:var(--txt2);margin-top:16px">You can cancel anytime via the e&amp; app or Luna settings.</p>
-  </div>
-</div>
-
-</div><!-- /phone -->
-
-<script>
-let currentScreen = "s-landing";
-let selectedPlan = {name:"Plus",price:"200 AED"};
-let timerInterval = null;
-
-function goTo(id, back) {
-  const cur = document.getElementById(currentScreen);
-  const nxt = document.getElementById(id);
-  if(!cur||!nxt) return;
-  cur.classList.remove("active");
-  if(back) {
-    cur.style.transform = "translateX(100%)";
-    nxt.style.transform = "translateX(-30%)";
-  } else {
-    cur.classList.add("exit-left");
-    nxt.style.transform = "translateX(100%)";
-  }
-  nxt.offsetHeight;
-  setTimeout(()=>{
-    nxt.style.transform = "";
-    nxt.classList.add("active");
-    cur.classList.remove("exit-left");
-    nxt.scrollTop = 0;
-  }, 20);
-  currentScreen = id;
-}
-
-function selectPlan(el, name, price) {
-  selectedPlan = {name, price};
-  document.querySelectorAll(".plan-card").forEach(c=>c.style.borderColor="transparent");
-  el.style.borderColor = "var(--sec)";
-  document.getElementById("selected-plan-name").textContent = name;
-  document.getElementById("selected-plan-price").textContent = price;
-  setTimeout(()=>goTo("s-msisdn"), 300);
-}
-
-function formatPhone(el) {
-  let v = el.value.replace(/\D/g,"");
-  if(v.length > 9) v = v.slice(0,9);
-  if(v.length > 7) v = v.slice(0,2)+" "+v.slice(2,5)+" "+v.slice(5);
-  else if(v.length > 2) v = v.slice(0,2)+" "+v.slice(2);
-  el.value = v;
-}
-
-function sendOtp() {
-  const ph = document.getElementById("phone-input").value;
-  if(ph.replace(/\D/g,"").length < 9) { document.getElementById("phone-input").style.borderColor="var(--err)"; return; }
-  const display = "+971 " + ph;
-  document.getElementById("otp-phone-display").textContent = display;
-  document.getElementById("otp-phone-display2").textContent = display;
-  goTo("s-otp-wait");
-  setTimeout(()=>{ goTo("s-otp"); startTimer(); }, 2000);
-}
-
-function otpNext(el, idx) {
-  const v = el.value.replace(/\D/g,"");
-  el.value = v;
-  if(v && idx < 5) {
-    el.classList.add("filled");
-    el.nextElementSibling.focus();
-  }
-  checkOtpFull();
-}
-
-function checkOtpFull() {
-  const inputs = document.querySelectorAll("#otp-box input");
-  const full = [...inputs].every(i=>i.value.length===1);
-  document.getElementById("confirm-otp-btn").style.opacity = full ? 1 : 0.5;
-}
-
-function confirmOtp() {
-  const inputs = document.querySelectorAll("#otp-box input");
-  const code = [...inputs].map(i=>i.value).join("");
-  if(code.length < 6) { document.getElementById("otp-error").style.display="block"; document.getElementById("otp-error").textContent="Please enter all 6 digits."; return; }
-  document.getElementById("otp-error").style.display="none";
-  if(timerInterval) clearInterval(timerInterval);
-  document.getElementById("conf-plan").textContent = selectedPlan.name;
-  document.getElementById("conf-price").textContent = selectedPlan.price + "/month";
-  const next = new Date(); next.setMonth(next.getMonth()+1);
-  document.getElementById("conf-next").textContent = next.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
-  goTo("s-confirm");
-}
-
-function startTimer() {
-  let sec = 299;
-  const txt = document.getElementById("timer-text");
-  const path = document.getElementById("timer-path");
-  const total = 238;
-  if(timerInterval) clearInterval(timerInterval);
-  timerInterval = setInterval(()=>{
-    sec--;
-    if(sec <= 0) { clearInterval(timerInterval); txt.textContent="0:00"; return; }
-    const m = Math.floor(sec/60);
-    const s = sec%60;
-    txt.textContent = m+":"+(s<10?"0":"")+s;
-    path.style.strokeDashoffset = total - (sec/299)*total;
-  }, 1000);
-}
-
-function resendOtp() {
-  const btn = document.getElementById("resend-btn");
-  btn.textContent = "OTP Resent!";
-  btn.style.color = "var(--ok)";
-  setTimeout(()=>{ btn.textContent="Resend OTP"; btn.style.color="var(--sec)"; }, 2000);
-}
-
-function resetDemo() {
-  document.querySelectorAll(".screen").forEach(s=>{s.classList.remove("active","exit-left");s.style.transform=""});
-  document.getElementById("s-landing").classList.add("active");
-  currentScreen = "s-landing";
-  document.getElementById("phone-input").value = "";
-  document.querySelectorAll("#otp-box input").forEach(i=>{i.value="";i.classList.remove("filled")});
-  if(timerInterval) clearInterval(timerInterval);
-}
-
-document.addEventListener("keydown", function(e) {
-  if(currentScreen==="s-otp" && e.key==="Backspace") {
-    const inputs = document.querySelectorAll("#otp-box input");
-    const focused = document.activeElement;
-    const idx = [...inputs].indexOf(focused);
-    if(idx > 0 && !focused.value) { inputs[idx-1].focus(); inputs[idx-1].value=""; inputs[idx-1].classList.remove("filled"); }
-  }
-});
-</script>
 </body>
 </html>
